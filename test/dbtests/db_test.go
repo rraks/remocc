@@ -2,7 +2,7 @@ package tests
 
 import (
     "testing"
-    "remocc/pkg/models"
+    "github.com/rraks/remocc/pkg/models"
 )
 
 type Env struct {
