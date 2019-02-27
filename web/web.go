@@ -42,9 +42,30 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+    tokenCook, err1 := r.Cookie("session_token")
+    emailCook, err2 := r.Cookie("email")
+    if err1 != nil || err2 !=nil {
+        if err1 == http.ErrNoCookie || err2 == http.ErrNoCookie {
+            // If the cookie is not set, return an unauthorized status
+            http.Redirect(w, r, "/login/", http.StatusFound)
+            return
+        }
+        http.Redirect(w, r, "/login/", http.StatusFound)
+        return
+    }
+    sessionEmail := emailCook.Value
+    sessionToken := tokenCook.Value
+    if val, found := authCache.Get(sessionEmail); found {
+        if sessionToken == val {
+            authCache.Delete(sessionEmail)
+        }
+    }
+    http.Redirect(w, r, "/login/", http.StatusFound)
+
+}
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-
     if r.Method == "GET" {
         http.ServeFile(w,r, "web/views/login.html")
     } else if r.Method == "POST" {
@@ -77,13 +98,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             http.Redirect(w,r, "/", http.StatusFound)
             return
         }
-
         http.Redirect(w,r, "/login/", http.StatusFound)
     }
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-
     if r.Method == "GET" {
         http.ServeFile(w,r, "web/views/register.html")
     } else if r.Method == "POST" {

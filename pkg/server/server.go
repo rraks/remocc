@@ -19,6 +19,7 @@ func Start() {
     fs := http.FileServer(http.Dir("web/static"))
     http.Handle("/static/", http.StripPrefix("/static/", fs))
     http.HandleFunc("/login/", web.LoginHandler)
+    http.HandleFunc("/logout/", web.LogoutHandler)
     http.HandleFunc("/", web.FrontPageHandler)
     http.HandleFunc("/register/", web.RegisterHandler)
     log.Fatal(http.ListenAndServe(":3000", nil))
