@@ -3,8 +3,7 @@ package tests
 import (
     "testing"
     "github.com/rraks/remocc/pkg/models"
-)
-
+) 
 type Env struct {
     db models.Datastore
 }
@@ -26,13 +25,13 @@ func TestDBMain(t *testing.T) {
 
     testTables := make([]models.User,8)
     testTables =  []models.User{{"Rax", "1ax@abc.com", "abc", "xyz"},
-                                 {"qax", "2ax@abc.com", "abc", "xyz"},
-                                 {"wax", "3ax@abc.com", "abc", "xyz"},
-                                 {"eax", "4ax@abc.com", "abc", "xyz"},
-                                 {"tax", "5ax@abc.com", "abc", "xyz"},
-                                 {"aax", "6ax@abc.com", "abc", "xyz"},
-                                 {"cax", "7ax@abc.com", "abc", "xyz"},
-                                 {"vax", "8ax@abc.com", "abc", "xyz"}, }
+    {"qax", "2ax@abc.com", "abc", "xyz"},
+    {"wax", "3ax@abc.com", "abc", "xyz"},
+    {"eax", "4ax@abc.com", "abc", "xyz"},
+    {"tax", "5ax@abc.com", "abc", "xyz"},
+    {"aax", "6ax@abc.com", "abc", "xyz"},
+    {"cax", "7ax@abc.com", "abc", "xyz"},
+    {"vax", "8ax@abc.com", "abc", "xyz"}, }
 
     db := openDB()
     env := &Env{db}
@@ -50,7 +49,7 @@ func TestDBMain(t *testing.T) {
     for i := 0; i<8; i++ {
         //Create test Users
         id, err := env.db.NewUser(testTables[i].Name, testTables[i].Email, 
-                    testTables[i].Org, testTables[i].Grp)
+        testTables[i].Org, testTables[i].Grp, "temppwd")
         if err != nil {
             t.Errorf(err.Error())
         }
@@ -58,11 +57,11 @@ func TestDBMain(t *testing.T) {
     }
 
     // Get one User
-    usr, err := env.db.AUser("wax")
+    usr, err := env.db.AUser("3ax@abc.com")
     if err != nil {
         t.Errorf(err.Error())
     }
-    t.Log("Found user", usr.Name)
+    t.Log("Found user", usr.Email)
 
     //Delete that user
     err = env.db.DeleteUser("wax")

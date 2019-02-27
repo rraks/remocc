@@ -16,19 +16,23 @@
     </head>
 
     <body class="text-center">
-        <form class="form-signin" action="/login/" method="POST">
+        <form class="form-signin" action="/register/" method="POST">
             <img class="mb-4" src="/static/remocc.png" alt="" width="200" height="200">
+            <label for="name" class="sr-only">Name</label>
+            <input type="text" name="name" id="name" class="form-control" placeholder="Name" required autofocus>
             <label for="inputEmail" class="sr-only">Email address</label>
             <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
             <label for="inputPassword" class="sr-only">Password</label>
             <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
-            <div class="checkbox">
+            <label for="confInputPassword" class="sr-only">Confirm Password</label>
+            <input type="password" name="confPassword" id="confInputPassword" class="form-control" placeholder="Confirm Password" required>
+            <div class="checkbox mb-3">
                 <label>
                     <input type="checkbox" value="remember-me"> Remember me
                 </label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-            <a href="/register/">Register</a>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+            <a href="/login/">Sign in</a>
         </form>
 
     </body>

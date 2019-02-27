@@ -6,6 +6,7 @@ body {
 	text-align: center;
 	color: #222;
 }
+
 textarea {
 	/* Inherit text color from body avoiding illegible text in the case where the
  	* user has inverted the browsers custom text and background colors. */
@@ -37,6 +38,70 @@ pre .ln {
 	color: #999;
 	background: #efefef;
 }
+
+.text-center{text-align:center!important}
+
+.mb-4,.my-4{
+    margin-bottom:1.5rem!important
+}
+.form-control{
+    display:block;
+    width:100%;padding:.375rem .75rem;
+    font-size:1rem;
+    line-height:1.5;
+    color:#495057;
+    background-color:#fff;
+    background-clip:padding-box;
+    border:1px solid #ced4da;
+    border-radius:.25rem;
+    transition:border-color .15s ease-in-out,box-shadow .15s ease-in-out
+}
+
+.sr-only{
+    position:absolute;
+    width:1px;
+    height:1px;
+    padding:0;
+    overflow:hidden;
+    clip:rect(0,0,0,0);
+    white-space:nowrap;
+    -webkit-clip-path:inset(50%);
+    clip-path:inset(50%);
+    border:0
+}
+
+.btn{
+    display:inline-block;
+    font-weight:400;
+    text-align:center;
+    white-space:nowrap;
+    vertical-align:middle;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+    border:1px solid transparent;
+    padding:.375rem .75rem;
+    font-size:1rem;
+    line-height:1.5;
+    border-radius:.25rem;
+    transition:color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out
+}
+
+.btn-primary{
+    color:#fff;
+    background-color:#007bff;
+    border-color:#007bff
+}
+
+.btn-lg{
+    padding:.5rem 1rem;
+    font-size:1.25rem;
+    line-height:1.5;
+    border-radius:.3rem
+}
+.btn-block{display:block;width:100%}
+
 .ln {
 	-webkit-user-select: none;
 	-moz-user-select: none;

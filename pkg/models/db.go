@@ -19,9 +19,10 @@ const (
 type Datastore interface {
     AllUsers() ([]*User, error)
     AUser(string) (*User, error)
-    NewUser(string, string, string, string) (int, error)
+    NewUser(string, string, string, string, string) (int, error)
     DeleteUser(string) (error)
     DeleteGrp(string) (error)
+    GetPwd(string) (string, error)
 }
 
 type DB struct {
