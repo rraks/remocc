@@ -16,13 +16,24 @@ const (
 )
 
 
-type Datastore interface {
+type UserStore interface {
     AllUsers() ([]*User, error)
     AUser(string) (*User, error)
-    NewUser(string, string, string, string, string) (int, error)
+    NewUser(string, string, string, string, string, string, string) (int, error)
     DeleteUser(string) (error)
     DeleteGrp(string) (error)
     GetPwd(string) (string, error)
+    CreateAppTable(string) (error)
+    CreateDeviceTable(string) (error)
+    DeleteTable(string) (error)
+}
+
+
+type DeviceStore interface {
+    AllDevices(string) ([]*Device, error)
+    ADevice(string, string) (*Device, error)
+    NewDevice(string, string, string, string) (int, error)
+    DeleteDevice(string, string) (error)
 }
 
 type DB struct {

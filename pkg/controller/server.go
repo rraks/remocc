@@ -1,7 +1,6 @@
-package server
+package controller
 
 import (
-    "github.com/rraks/remocc/web"
     "net/http"
     "log"
 
@@ -18,9 +17,9 @@ func Start() {
     // Serve static resources
     fs := http.FileServer(http.Dir("web/static"))
     http.Handle("/static/", http.StripPrefix("/static/", fs))
-    http.HandleFunc("/login/", web.LoginHandler)
-    http.HandleFunc("/logout/", web.LogoutHandler)
-    http.HandleFunc("/", web.FrontPageHandler)
-    http.HandleFunc("/register/", web.RegisterHandler)
+    http.HandleFunc("/login/", LoginHandler)
+    http.HandleFunc("/logout/", LogoutHandler)
+    http.HandleFunc("/", FrontPageHandler)
+    http.HandleFunc("/register/", RegisterHandler)
     log.Fatal(http.ListenAndServe(":3000", nil))
 }

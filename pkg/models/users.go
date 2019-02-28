@@ -1,21 +1,56 @@
 package models
 
 
+//TODO : Further modularization to shorten redundant code
+
+import "log"
 
 type User struct {
     Name, Email, Org, Grp string
 }
 
 
-func (db *DB) NewUser(name string, email string, org string, grp string, pswd string) (int, error) {
-    query := "INSERT INTO users (name, email, orgname, groupname,password) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+
+func (db *DB) NewUser(name string, email string, org string, grp string, pswd string, dev string, app string) (int, error) {
+    query := "INSERT INTO users (name, email, orgname, groupname, password, dev, app) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
     id := 0
-    err := db.QueryRow(query, name, email, org, grp, pswd).Scan(&id)
+    err := db.QueryRow(query, name, email, org, grp, pswd, dev, app).Scan(&id)
     if err != nil {
         return id, err
     }
     return id, nil
 }
+
+
+func (db *DB) CreateDeviceTable(tableName string) (error) {
+    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,deviceName TEXT, macId Text, description Text, authKey Text)"
+    _, err := db.Exec(query)
+    if err != nil {
+        log.Println(err)
+        return err
+    }
+    return nil
+}
+
+func (db *DB) CreateAppTable(tableName string) (error) {
+    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,appName TEXT, description Text, authKey Text)"
+    _, err := db.Exec(query)
+    if err != nil {
+        log.Println(err)
+        return err
+    }
+    return nil
+}
+
+
+func (db *DB) DeleteTable(tableName string) (error) {
+    _, err := db.Exec("DROP TABLE "+ tableName )
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
 
 
 func (db *DB) AllUsers() ([]*User, error) {

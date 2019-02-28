@@ -1,9 +1,9 @@
 package main
 
 import (
-    "github.com/rraks/remocc/pkg/server"
+    "github.com/rraks/remocc/pkg/controller"
 )
 
 func main() {
-    server.Start()
+    controller.Start()
 }

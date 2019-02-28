@@ -1,4 +1,4 @@
-package web
+package controller
 
 import (
     "net/http"
@@ -7,16 +7,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
     "github.com/satori/go.uuid"
     "github.com/patrickmn/go-cache"
+    "hash/fnv"
+    "bytes"
     "time"
 )
 
-const (
-    username = "abc@abc.com"
-    password = "abc"
-)
 
 type Env struct {
-    db models.Datastore
+    db models.UserStore
 }
 
 var env *Env
@@ -31,6 +29,21 @@ func init() {
 
     authCache = cache.New(2*time.Hour,4*time.Hour)
 }
+
+
+func hashString(s string) string  {
+    var out []byte
+    h := fnv.New32a()
+    log.Println("Received", s)
+    h.Write([]byte(s))
+    h.Sum(out)
+    log.Println(out)
+    n := bytes.IndexByte(out, 0)
+    log.Println("Size ", n)
+    return string(out[:n])
+}
+
+
 
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
@@ -108,17 +121,24 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     } else if r.Method == "POST" {
         err := r.ParseForm()
         if err != nil {
-            log.Println("Failed to parse form")
+            http.Redirect(w, r, "/register/", http.StatusFound)
         }
         name := r.Form["name"][0]
-        uname := r.Form["email"][0]
+        email := r.Form["email"][0]
         pswd := r.Form["password"][0]
         cnfmpswd := r.Form["confPassword"][0]
         if  (pswd == cnfmpswd) {
-            hash, _ := HashPassword(pswd)
-            _, err := env.db.NewUser(name, uname, "default", "default", hash)
+            hashpwd, _ := HashPassword(pswd)
+            err1 := env.db.CreateDeviceTable("dev_"+name) // TODO: Replace with hash of email instead of name
+            err2 := env.db.CreateAppTable("app_"+name)
+            if (err1 != nil) && (err2 != nil) {
+                http.Redirect(w, r, "/register/", http.StatusFound)
+                return
+            }
+            _, err := env.db.NewUser(name, email, "default", "default", hashpwd, "dev"+name, "app"+name)
             if err != nil {
-                w.Write([]byte("Failed to create"))
+                http.Redirect(w, r, "/register/", http.StatusFound)
+                return 
             }
             http.Redirect(w, r, "/login/", http.StatusFound)
             return
@@ -132,7 +152,6 @@ func FrontPageHandler(w http.ResponseWriter, r *http.Request) {
     emailCook, err2 := r.Cookie("email")
     if err1 != nil || err2 !=nil {
         if err1 == http.ErrNoCookie || err2 == http.ErrNoCookie {
-            // If the cookie is not set, return an unauthorized status
             http.Redirect(w, r, "/login/", http.StatusFound)
             return
         }

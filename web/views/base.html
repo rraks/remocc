@@ -1,30 +1,112 @@
 <!DOCTYPE html>
-<!-- saved from url=(0019)https://golang.org/ -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!-- saved from url=(0053)https://v4-alpha.getbootstrap.com/examples/dashboard/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#375EAB">
-<link type="text/css" rel="stylesheet" href="/static/gostyle.css">
-  <title>Remote Command and Control</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <link rel="icon" href="/static/remocc.png">
 
-<body>
+        <title>Remote Command and Control</title>
+        <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/dashboard/">
 
-<div id="lowframe" style="position: fixed; bottom: 0; left: 0; height: 0; width: 100%; border-top: thin solid grey; background-color: white; overflow: auto;">
-...
-</div><!-- #lowframe -->
+        <!-- Bootstrap core CSS -->
+        <link href="/static/bootstrap.min.css" rel="stylesheet">
 
-<div id="topbar"><div class="container">
-<div class="top-heading" id="heading-wide">Remote Command and Control</a></div>
-<div class="top-heading" id="heading-narrow">Go</a></div>
-<form method="GET">
-<div id="menu" class="">
-<span class="search-box"><input type="search" id="search" name="q" placeholder="Search" aria-label="Search" required=""><button type="submit"><span><!-- magnifying glass: --><svg width="24" height="24" viewBox="0 0 24 24"><title>submit search</title><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></button></span>
-<a>Settings</a>
-<a href="/logout/">Logout</a>
+        <!-- Custom styles for this template -->
+        <link href="/static/dashboard.css" rel="stylesheet">
+    </head>
 
-</div>
-</form>
+    <body>
+        <nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse">
+            <button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/">RemoCC</a>
 
-</div></div>
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/devices/">Devices <span class="sr-only">(current)</span></a>
+                    </li>
+                </ul>
+                <form class="form-inline mt-2 mt-md-0">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="">Settings</a>
+                        </li>
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/logout/">Logout <span class="sr-only">(current)</span></a>
+                            </li>
+                        </ul>
+                    </ul>
+                </form>
+            </div>
+        </nav>
 
-</body></html>
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="col-sm-3 col-md-2 hidden-xs-down bg-faded sidebar">
+                    <ul class="nav nav-pills flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="">Devices <span class="sr-only">(current)</span></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="">Apps</a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
+                <h1>Devices</h1>
+
+                <h2>Section title</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mac Address</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Main Device</td>
+                                <td>ab:cd:ef:gh</td>
+                                <td>The main device ha</td>
+                                <td>Active</td>
+                                <td>Launch</td>
+                            </tr>
+                            <tr>
+                                <td>Secondary Device</td>
+                                <td>ab:cd:ef:00</td>
+                                <td>The Secondary device ha</td>
+                                <td>Active</td>
+                                <td>Launch</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Bootstrap core JavaScript
+            ================================================== -->
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script src="/static/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+            <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+            <script src="/static/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+            <script src="/static/bootstrap.min.js"></script>
+            <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+            <script src="/static/ie10-viewport-bug-workaround.js"></script>
+
+
+    </body></html>

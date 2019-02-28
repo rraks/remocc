@@ -3,9 +3,9 @@ package tests
 import (
     "testing"
     "github.com/rraks/remocc/pkg/models"
-) 
+)
 type Env struct {
-    db models.Datastore
+    db models.UserStore
 }
 
 type mockDB struct{}
@@ -20,9 +20,7 @@ func openDB()(db *models.DB)  {
 
 
 
-
 func TestDBMain(t *testing.T) {
-
     testTables := make([]models.User,8)
     testTables =  []models.User{{"Rax", "1ax@abc.com", "abc", "xyz"},
     {"qax", "2ax@abc.com", "abc", "xyz"},
@@ -77,6 +75,19 @@ func TestDBMain(t *testing.T) {
     }
     for _, usr := range usrs {
         t.Log("Found user  ", usr.Name)
+    }
+
+    //Create a table for a user
+    err = env.db.CreateTable("Yada")
+    if err != nil {
+        t.Errorf(err.Error())
+    }
+
+
+    //Delete a table for a user
+    err = env.db.DeleteTable("Yada")
+    if err != nil {
+        t.Errorf(err.Error())
     }
 
     // Delete group again
