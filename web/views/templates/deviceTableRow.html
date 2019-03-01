@@ -1,10 +1,13 @@
-{{ define "yield" }}
-{{ with .List }}
-<tr>
-    <td>{{ .deviceName }}</td>
-    <td>{{ .macID }}</td>
-    <td>{{ .description }}</td>
-    <td>{{ .status }}</td>
-    <td>{{ .action }}</td>
-</tr>
-{{ end }}
+{{define "yield"}}
+{{with .Devices}}
+        {{range .}}
+        <tr>
+            <td>{{.Name }}</td>
+            <td>{{.MacId }}</td>
+            <td>{{.Description }}</td>
+            <td>Active</td>
+            <td>Launch</td>
+        </tr>
+        {{end}}
+    {{end}}
+{{end}}

@@ -9,8 +9,6 @@ import (
     "log"
     "github.com/rraks/remocc/pkg/models"
 	"golang.org/x/crypto/bcrypt"
-    "github.com/satori/go.uuid"
-    "github.com/patrickmn/go-cache"
 )
 
 
@@ -80,27 +78,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             http.Redirect(w, r, "/login", http.StatusFound) // TODO: Add not found flash message
             return
         }
-        email := usr.Email
-        hash, err := usrEnv.db.GetPwd(email)
+        hash, err := usrEnv.db.GetPwd(usr.Email)
         match := CheckPasswordHash(r.Form["password"][0], hash)
         if match == true {
-            sessionToken := uuid.NewV4().String()
-            usrAuthCache.Set(email, sessionToken, cache.DefaultExpiration)
-            http.SetCookie(w, &http.Cookie{
-                    Name:    "dev_table",
-                    Value:   "dev_" + usr.Name,
-                    Path: "/",
-                })
-            http.SetCookie(w, &http.Cookie{
-                    Name:    "email",
-                    Value:   email,
-                    Path: "/",
-                })
-            http.SetCookie(w, &http.Cookie{
-                    Name:    "session_token",
-                    Value:   sessionToken,
-                    Path: "/",
-                })
+            LogSession(w, usr)
             http.Redirect(w,r, "/", http.StatusFound)
             return
         }
@@ -128,7 +109,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return
             }
-            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "dev"+name, "app"+name)
+            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "dev_"+name, "app_"+name)
             if err != nil {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return 

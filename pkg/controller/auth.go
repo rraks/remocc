@@ -3,9 +3,10 @@ package controller
 
 import (
     "net/http"
+    "github.com/satori/go.uuid"
     "github.com/patrickmn/go-cache"
     "time"
-    "log"
+    "github.com/rraks/remocc/pkg/models"
 )
 
 var usrAuthCache *cache.Cache
@@ -23,19 +24,36 @@ func ProvideHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFun
                 http.Redirect(w, r, "/login/", http.StatusFound)
                 return
             }
-            sessionEmail := emailCook.Value
-            sessionToken := tokenCook.Value
-            log.Println(sessionEmail)
-            if val, found := usrAuthCache.Get(sessionEmail); found {
-                if sessionToken == val {
-                    http.ServeFile(w,r, "web/views/base.html")
-                    return
-                }
-            }
-            http.Redirect(w, r, "/login/", http.StatusFound)
-            return
         }
-        fn(w, r)
+        sessionEmail := emailCook.Value
+        sessionToken := tokenCook.Value
+        if val, found := usrAuthCache.Get(sessionEmail); found {
+            if sessionToken == val {
+                fn(w, r)
+                return
+            }
+        }
+        http.Redirect(w, r, "/login/", http.StatusFound)
     }
 }
 
+
+func LogSession(w http.ResponseWriter, usr *models.User) {
+    sessionToken := uuid.NewV4().String()
+    usrAuthCache.Set(usr.Email, sessionToken, cache.DefaultExpiration)
+    http.SetCookie(w, &http.Cookie{
+        Name:    "dev_table",
+        Value:   "dev_" + usr.Name,
+        Path: "/",
+    })
+    http.SetCookie(w, &http.Cookie{
+        Name:    "email",
+        Value:   usr.Email,
+        Path: "/",
+    })
+    http.SetCookie(w, &http.Cookie{
+        Name:    "session_token",
+        Value:   sessionToken,
+        Path: "/",
+    })
+}

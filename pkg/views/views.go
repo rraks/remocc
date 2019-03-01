@@ -1,4 +1,4 @@
-package web
+package views
 
 import (
   "html/template"
@@ -6,7 +6,7 @@ import (
   "net/http"
 )
 
-var LayoutDir string = "web/views/layouts"
+var LayoutDir string = "web/views/"
 
 func NewView(layout string, files ...string) *View {
   files = append(files, LayoutFiles()...)

@@ -7,6 +7,7 @@ package controller
 import (
     "net/http"
     "github.com/rraks/remocc/pkg/models"
+    "github.com/rraks/remocc/pkg/views"
 )
 
 
@@ -52,5 +53,11 @@ func NewDeviceHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func FrontPageHandler(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w,r, "web/views/base.html")
+    //TODO : Replace with a db call and retreive context via cookie in r
+    testDevices := make([]models.Device,2)
+    testDevices = []models.Device{
+                    {"ABC", "12:12:12:12", "Greatest Device on earth"},
+                    {"XYZ", "11:11:12:12", "Not Greatest Device on earth"},
+                }
+    views.RenderTableRow(w, testDevices)
 }
