@@ -19,7 +19,7 @@ func Start() {
     http.Handle("/static/", http.StripPrefix("/static/", fs))
     http.HandleFunc("/login/", LoginHandler)
     http.HandleFunc("/logout/", LogoutHandler)
-    http.HandleFunc("/", FrontPageHandler)
+    http.HandleFunc("/", ProvideHandler(FrontPageHandler))
     http.HandleFunc("/register/", RegisterHandler)
     log.Fatal(http.ListenAndServe(":3000", nil))
 }

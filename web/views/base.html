@@ -1,3 +1,4 @@
+{{define "base"}}
 <!DOCTYPE html>
 <!-- saved from url=(0053)https://v4-alpha.getbootstrap.com/examples/dashboard/ -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -84,13 +85,7 @@
                                 <td>Active</td>
                                 <td>Launch</td>
                             </tr>
-                            <tr>
-                                <td>Secondary Device</td>
-                                <td>ab:cd:ef:00</td>
-                                <td>The Secondary device ha</td>
-                                <td>Active</td>
-                                <td>Launch</td>
-                            </tr>
+                            {{template "yield" .}}
                         </tbody>
                     </table>
                 </div>

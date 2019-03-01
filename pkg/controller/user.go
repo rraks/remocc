@@ -1,5 +1,9 @@
 package controller
 
+//TODO :[
+//          Verify uniqueness of name
+//]
+
 import (
     "net/http"
     "log"
@@ -7,40 +11,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
     "github.com/satori/go.uuid"
     "github.com/patrickmn/go-cache"
-    "hash/fnv"
-    "bytes"
-    "time"
 )
 
 
-type Env struct {
+type UsrEnv struct {
     db models.UserStore
 }
 
-var env *Env
-var authCache *cache.Cache
+var usrEnv *UsrEnv
+//var usrAuthCache *cache.Cache
 
 func init() {
     db, err := models.InitDB()
     if err != nil {
         panic(err)
     }
-    env = &Env{db}
+    usrEnv = &UsrEnv{db}
 
-    authCache = cache.New(2*time.Hour,4*time.Hour)
-}
-
-
-func hashString(s string) string  {
-    var out []byte
-    h := fnv.New32a()
-    log.Println("Received", s)
-    h.Write([]byte(s))
-    h.Sum(out)
-    log.Println(out)
-    n := bytes.IndexByte(out, 0)
-    log.Println("Size ", n)
-    return string(out[:n])
+//    usrAuthCache = cache.New(2*time.Hour,4*time.Hour)
 }
 
 
@@ -69,9 +57,9 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
     }
     sessionEmail := emailCook.Value
     sessionToken := tokenCook.Value
-    if val, found := authCache.Get(sessionEmail); found {
+    if val, found := usrAuthCache.Get(sessionEmail); found {
         if sessionToken == val {
-            authCache.Delete(sessionEmail)
+            usrAuthCache.Delete(sessionEmail)
         }
     }
     http.Redirect(w, r, "/login/", http.StatusFound)
@@ -87,17 +75,22 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             log.Println("Failed to parse form")
         }
         uname := r.Form["email"][0]
-        usr, err := env.db.AUser(uname)
+        usr, err := usrEnv.db.AUser(uname)
         if err != nil {
             http.Redirect(w, r, "/login", http.StatusFound) // TODO: Add not found flash message
             return
         }
         email := usr.Email
-        hash, err := env.db.GetPwd(email)
+        hash, err := usrEnv.db.GetPwd(email)
         match := CheckPasswordHash(r.Form["password"][0], hash)
         if match == true {
             sessionToken := uuid.NewV4().String()
-            authCache.Set(email, sessionToken, cache.DefaultExpiration)
+            usrAuthCache.Set(email, sessionToken, cache.DefaultExpiration)
+            http.SetCookie(w, &http.Cookie{
+                    Name:    "dev_table",
+                    Value:   "dev_" + usr.Name,
+                    Path: "/",
+                })
             http.SetCookie(w, &http.Cookie{
                     Name:    "email",
                     Value:   email,
@@ -129,13 +122,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         cnfmpswd := r.Form["confPassword"][0]
         if  (pswd == cnfmpswd) {
             hashpwd, _ := HashPassword(pswd)
-            err1 := env.db.CreateDeviceTable("dev_"+name) // TODO: Replace with hash of email instead of name
-            err2 := env.db.CreateAppTable("app_"+name)
+            err1 := usrEnv.db.CreateDeviceTable("dev_"+name) // TODO: Replace with hash of email instead of name
+            err2 := usrEnv.db.CreateAppTable("app_"+name)
             if (err1 != nil) && (err2 != nil) {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return
             }
-            _, err := env.db.NewUser(name, email, "default", "default", hashpwd, "dev"+name, "app"+name)
+            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "dev"+name, "app"+name)
             if err != nil {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return 
@@ -147,25 +140,4 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 
-func FrontPageHandler(w http.ResponseWriter, r *http.Request) {
-    tokenCook, err1 := r.Cookie("session_token")
-    emailCook, err2 := r.Cookie("email")
-    if err1 != nil || err2 !=nil {
-        if err1 == http.ErrNoCookie || err2 == http.ErrNoCookie {
-            http.Redirect(w, r, "/login/", http.StatusFound)
-            return
-        }
-        http.Redirect(w, r, "/login/", http.StatusFound)
-        return
-    }
-    sessionEmail := emailCook.Value
-    sessionToken := tokenCook.Value
-    if val, found := authCache.Get(sessionEmail); found {
-        if sessionToken == val {
-            http.ServeFile(w,r, "web/views/base.html")
-            return
-        }
-    }
-    http.Redirect(w, r, "/login/", http.StatusFound)
-}
 

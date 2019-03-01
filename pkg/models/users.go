@@ -1,7 +1,8 @@
 package models
 
 
-//TODO : Further modularization to shorten redundant code
+//TODO : [Further modularization to shorten redundant code]
+//          
 
 import "log"
 

@@ -1,0 +1,10 @@
+{{ define "yield" }}
+{{ with .List }}
+<tr>
+    <td>{{ .deviceName }}</td>
+    <td>{{ .macID }}</td>
+    <td>{{ .description }}</td>
+    <td>{{ .status }}</td>
+    <td>{{ .action }}</td>
+</tr>
+{{ end }}
