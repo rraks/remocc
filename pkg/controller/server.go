@@ -21,5 +21,6 @@ func Start() {
     http.HandleFunc("/logout/", LogoutHandler)
     http.HandleFunc("/", ProvideHandler(FrontPageHandler))
     http.HandleFunc("/register/", RegisterHandler)
+    http.HandleFunc("/device/", ProvideHandler(DeviceManagerHandler))
     log.Fatal(http.ListenAndServe(":3000", nil))
 }

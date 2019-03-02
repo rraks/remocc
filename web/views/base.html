@@ -16,13 +16,12 @@
 
         <!-- Custom styles for this template -->
         <link href="/static/dashboard.css" rel="stylesheet">
+
+
     </head>
 
     <body>
         <nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse">
-            <button class="navbar-toggler navbar-toggler-right hidden-lg-up" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <a class="navbar-brand" href="/">RemoCC</a>
             <div class="collapse navbar-collapse" id="navbarsExampleDefault">
                 <ul class="navbar-nav mr-auto">
@@ -30,16 +29,14 @@
                         <a class="nav-link" href="">Home <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="/devices/">Devices <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="/devices/">Alerts <span class="sr-only">(current)</span></a>
                     </li>
                 </ul>
                 <form class="form-inline mt-2 mt-md-0">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="">Settings</a>
+                            <a class="nav-link" href="">User</a>
                         </li>
-                    </ul>
-                    <ul class="navbar-nav mr-auto">
                         <li class="nav-item active">
                             <a class="nav-link" href="/logout/">Logout <span class="sr-only">(current)</span></a>
                         </li>
@@ -62,9 +59,71 @@
                 </nav>
 
                 <main class="col-sm-9 offset-sm-3 col-md-10 offset-md-2 pt-3">
-                <h1>Devices</h1>
 
-                <h2>Section title</h2>
+                <div class="panel panel-primary">
+                    <div class="panel-heading clearfix">
+                        <h4 class="panel-title float-left" style="padding-top: 7.5px;">Devices</h4>
+                        <div class="btn-group float-right">
+                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#newDeviceModal">
+                                New Device
+                            </button>
+                            <!-- New device modal form -->
+                            <div class="modal fade" id="newDeviceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="newDevDet">Onboard new device</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-signin" >
+                                                <label for="devName" class="sr-only">Device Name</label>
+                                                <input type="text" name="devName" id="devName" class="form-control" placeholder="Short Name" required autofocus>
+                                                <label for="macId" class="sr-only">mac address</label>
+                                                <input type="text" name="macId" id="macId" class="form-control" placeholder="ab:cd:ef:12:34:56" required>
+                                                <label for="devDescr" class="sr-only">Device Description</label>
+                                                <input type="text" name="devDescr" id="devDescr" class="form-control" placeholder="Short description" required>
+                                                <label for="sshKey" class="sr-only">SSH KEY</label>
+                                                <input type="text" name="sshKey" id="sshKey" class="form-control" placeholder="id_rsa.pub key" required>
+                                                <button class="btn btn-lg btn-primary btn-block" type="submit" onClick="newDevice()">Register Device</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delDeviceModal">
+                                Delete Device
+                            </button>
+                            <!-- Delete device modal form -->
+                            <div class="modal fade" id="delDeviceModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="delDevHead">Delete Device</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-signin" action="/device/" method="DELETE">
+                                                <label for="delDevName" class="sr-only">Device Name</label>
+                                                <input type="text" name="delDevName" id="delDevName" class="form-control" placeholder="Device Name" required autofocus>
+                                                <label for="confDevName" class="sr-only">Confirm Device Name</label>
+                                                <input type="text" name="confDevName" id="confDevName" class="form-control" placeholder="Confirm Device Name" required autofocus>
+                                                <button class="btn btn-lg btn-primary btn-block" type="submit" onClick="deleteDevice()">Delete Device</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
@@ -77,13 +136,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Main Device</td>
-                                <td>ab:cd:ef:gh</td>
-                                <td>The main device ha</td>
-                                <td>Active</td>
-                                <td>Launch</td>
-                            </tr>
                             {{template "yield" .}}
                         </tbody>
                     </table>
@@ -96,12 +148,44 @@
             ================================================== -->
             <!-- Placed at the end of the document so the pages load faster -->
             <script src="/static/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-            <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+            <script>window.jQuery || document.write('<script src="/static/jquery.min.js"><\/script>')</script>
             <script src="/static/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
             <script src="/static/bootstrap.min.js"></script>
+            <script src="/static/jquery.min.js"></script>
             <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
             <script src="/static/ie10-viewport-bug-workaround.js"></script>
 
+        <!-- submit create device form -->
+        <script type="text/javascript">
+            function newDevice(){
+                $.ajax({
+                    "type": 'POST',
+                    "url": '/device/',
+                    "data": {
+                        "devName": $("#devName").val(),
+                        "macId": $("#macId").val(),
+                        "devDescr": $("#devDescr").val(),
+                        "sshKey": $("#sshKey").val(),
+                    },
+                    "content-type": "application/x-www-form-urlencoded",
+
+                });
+            }
+        </script>
+        <!-- submit delete device form -->
+        <script type="text/javascript">
+            function deleteDevice(){
+                $.ajax({
+                    "type": 'DELETE',
+                    "url": '/device?'+'devName='+ $("#delDevName").val()+'&confDevName='+ $("#confDevName").val(),
+                    "content-type": "application/x-www-form-urlencoded",
+
+                });
+            }
+</script>
+
+
+
 
     </body></html>
-{{end}}
+    {{end}}

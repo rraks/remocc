@@ -34,7 +34,7 @@ type UserStore interface {
 type DeviceStore interface {
     AllDevices(string) ([]*Device, error)
     ADevice(string, string) (*Device, error)
-    NewDevice(string, string, string, string) (int, error)
+    NewDevice(string, string, string, string, string) (int, error)
     DeleteDevice(string, string) (error)
 }
 

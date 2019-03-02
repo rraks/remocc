@@ -24,7 +24,7 @@ func (db *DB) NewUser(name string, email string, org string, grp string, pswd st
 
 
 func (db *DB) CreateDeviceTable(tableName string) (error) {
-    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,deviceName TEXT, macId Text, description Text, authKey Text)"
+    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,devName TEXT, macId Text, devDescr Text, sshKey Text)"
     _, err := db.Exec(query)
     if err != nil {
         log.Println(err)

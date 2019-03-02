@@ -16,9 +16,9 @@ func init() {
 
 
 // TODO : Create a more generic renderer function
-func RenderTableRow(w http.ResponseWriter, Devs []models.Device) {
+func RenderTableRow(w http.ResponseWriter, Devs []*models.Device) {
     row := struct {
-        Devices []models.Device
+        Devices []*models.Device
     }{Devs}
     err := tableView.Render(w, row)
     if err != nil {
