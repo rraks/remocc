@@ -7,10 +7,10 @@ type Device struct {
 }
 
 
-func (db *DB) NewDevice(tableName string, devName string, macId string, devDescr string, sshKey string) (int, error) {
-    query := "INSERT INTO "+ tableName + " (devName, macId, devDescr, sshKey) VALUES ($1, $2, $3, $4) RETURNING id"
+func (db *DB) NewDevice(tableName string, devName string, macId string, devDescr string, sshKey string, devPwdHash string) (int, error) {
+    query := "INSERT INTO "+ tableName + " (devName, macId, devDescr, sshKey, devPwdHash) VALUES ($1, $2, $3, $4, $5) RETURNING id"
     id := 0
-    err := db.QueryRow(query, devName, macId, devDescr, sshKey).Scan(&id)
+    err := db.QueryRow(query, devName, macId, devDescr, sshKey, devPwdHash).Scan(&id)
     if err != nil {
         return id, err
     }
@@ -67,4 +67,36 @@ func (db *DB) DeleteDevice(tableName string, devName string) (error) {
     return nil
 }
 
+func (db *DB) DropDeviceTable(tableName string) (error) {
+    _, err := db.Exec("DROP TABLE "+ tableName)
+    if err != nil {
+        return err
+    }
+    return nil
+}
 
+
+
+func (db *DB) CreateDeviceLog(tableName string) (error) {
+    query := "CREATE TABLE "+ tableName + " (lastSeen timestamptz NOT NULL DEFAULT now(), downlinkMsg text, uplinkMsg text, pingTime smallint )"
+    _, err := db.Exec(query)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (db *DB) GetDevPwd(userTable string, devName string) (string, error) {
+    var hash string
+    rows, err := db.Query("SELECT devPwdHash FROM " + userTable + " WHERE devName='" + devName + "'")
+    if err != nil {
+        return "", err
+    }
+    defer rows.Close()
+    rows.Next()
+    err = rows.Scan(&hash)
+    if err != nil {
+        return "", err
+    }
+    return hash, nil
+}

@@ -7,6 +7,7 @@ import (
     "github.com/patrickmn/go-cache"
     "time"
     "github.com/rraks/remocc/pkg/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var usrAuthCache *cache.Cache
@@ -14,6 +15,18 @@ var usrAuthCache *cache.Cache
 func init() {
     usrAuthCache = cache.New(2*time.Hour,4*time.Hour)
 }
+
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 
 func ProvideHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +56,7 @@ func LogSession(w http.ResponseWriter, usr *models.User) {
     usrAuthCache.Set(usr.Email, sessionToken, cache.DefaultExpiration)
     http.SetCookie(w, &http.Cookie{
         Name:    "dev_table",
-        Value:   "dev_" + usr.Name,
+        Value:   "devices_" + usr.Name,
         Path: "/",
     })
     http.SetCookie(w, &http.Cookie{

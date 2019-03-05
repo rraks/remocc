@@ -26,7 +26,7 @@ type UserStore interface {
     DeleteGrp(string) (error)
     GetPwd(string) (string, error)
     CreateAppTable(string) (error)
-    CreateDeviceTable(string) (error)
+    CreateDevicesTable(string) (error)
     DeleteTable(string) (error)
 }
 
@@ -34,8 +34,11 @@ type UserStore interface {
 type DeviceStore interface {
     AllDevices(string) ([]*Device, error)
     ADevice(string, string) (*Device, error)
-    NewDevice(string, string, string, string, string) (int, error)
+    NewDevice(string, string, string, string, string, string) (int, error)
     DeleteDevice(string, string) (error)
+    CreateDeviceLog(string) (error)
+    DropDeviceTable(string) (error)
+    GetDevPwd(string, string) (string, error)
 }
 
 type DB struct {

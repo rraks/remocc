@@ -8,7 +8,6 @@ import (
     "net/http"
     "log"
     "github.com/rraks/remocc/pkg/models"
-	"golang.org/x/crypto/bcrypt"
 )
 
 
@@ -31,15 +30,6 @@ func init() {
 
 
 
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
     tokenCook, err1 := r.Cookie("session_token")
@@ -103,13 +93,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         cnfmpswd := r.Form["confPassword"][0]
         if  (pswd == cnfmpswd) {
             hashpwd, _ := HashPassword(pswd)
-            err1 := usrEnv.db.CreateDeviceTable("dev_"+name) // TODO: Replace with hash of email instead of name
-            err2 := usrEnv.db.CreateAppTable("app_"+name)
+            err1 := usrEnv.db.CreateDevicesTable("devices_"+name) // TODO: Replace with hash of email instead of name
+            err2 := usrEnv.db.CreateAppTable("apps_"+name)
             if (err1 != nil) && (err2 != nil) {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return
             }
-            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "dev_"+name, "app_"+name)
+            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "devices_"+name, "app_"+name)
             if err != nil {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return 

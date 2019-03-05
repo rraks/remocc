@@ -23,35 +23,6 @@ func (db *DB) NewUser(name string, email string, org string, grp string, pswd st
 }
 
 
-func (db *DB) CreateDeviceTable(tableName string) (error) {
-    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,devName TEXT, macId Text, devDescr Text, sshKey Text)"
-    _, err := db.Exec(query)
-    if err != nil {
-        log.Println(err)
-        return err
-    }
-    return nil
-}
-
-func (db *DB) CreateAppTable(tableName string) (error) {
-    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,appName TEXT, description Text, authKey Text)"
-    _, err := db.Exec(query)
-    if err != nil {
-        log.Println(err)
-        return err
-    }
-    return nil
-}
-
-
-func (db *DB) DeleteTable(tableName string) (error) {
-    _, err := db.Exec("DROP TABLE "+ tableName )
-    if err != nil {
-        return err
-    }
-    return nil
-}
-
 
 
 func (db *DB) AllUsers() ([]*User, error) {
@@ -122,3 +93,32 @@ func (db *DB) GetPwd(email string) (string, error) {
     return hash, nil
 }
 
+
+func (db *DB) CreateDevicesTable(tableName string) (error) {
+    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,devName TEXT, macId macaddr, devDescr Text, sshKey Text, devPwdHash Text)"
+    _, err := db.Exec(query)
+    if err != nil {
+        log.Println(err)
+        return err
+    }
+    return nil
+}
+
+func (db *DB) CreateAppTable(tableName string) (error) {
+    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,appName TEXT, description Text, authKey Text)"
+    _, err := db.Exec(query)
+    if err != nil {
+        log.Println(err)
+        return err
+    }
+    return nil
+}
+
+
+func (db *DB) DeleteTable(tableName string) (error) {
+    _, err := db.Exec("DROP TABLE "+ tableName )
+    if err != nil {
+        return err
+    }
+    return nil
+}

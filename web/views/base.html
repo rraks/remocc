@@ -78,16 +78,18 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <form class="form-signin" >
+                                            <form class="form-signin" id="newDeviceForm" method="POST" action="/device/">
                                                 <label for="devName" class="sr-only">Device Name</label>
-                                                <input type="text" name="devName" id="devName" class="form-control" placeholder="Short Name" required autofocus>
+                                                <input type="text" name="devName" id="devName" class="form-control" placeholder="name" required autofocus>
                                                 <label for="macId" class="sr-only">mac address</label>
-                                                <input type="text" name="macId" id="macId" class="form-control" placeholder="ab:cd:ef:12:34:56" required>
+                                                <input type="text" name="macId" id="macId" class="form-control" placeholder="MAC Address of the device" required>
                                                 <label for="devDescr" class="sr-only">Device Description</label>
                                                 <input type="text" name="devDescr" id="devDescr" class="form-control" placeholder="Short description" required>
                                                 <label for="sshKey" class="sr-only">SSH KEY</label>
                                                 <input type="text" name="sshKey" id="sshKey" class="form-control" placeholder="id_rsa.pub key" required>
-                                                <button class="btn btn-lg btn-primary btn-block" type="submit" onClick="newDevice()">Register Device</button>
+                                                <label for="devPwd" class="sr-only">Device Password</label>
+                                                <input type="password" name="devPwd" id="devPwd" class="form-control" placeholder="Device Password" required>
+                                                <button class="btn btn-lg btn-primary btn-block" type="submit">Register Device</button>
                                             </form>
                                         </div>
                                     </div>
@@ -125,20 +127,22 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Mac Address</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Mac Address</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {{template "yield" .}}
                         </tbody>
                     </table>
+
+
                 </div>
                 </main>
             </div>
@@ -155,6 +159,10 @@
             <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
             <script src="/static/ie10-viewport-bug-workaround.js"></script>
 
+
+
+
+        <!--
         <!-- submit create device form -->
         <script type="text/javascript">
             function newDevice(){
@@ -166,12 +174,14 @@
                         "macId": $("#macId").val(),
                         "devDescr": $("#devDescr").val(),
                         "sshKey": $("#sshKey").val(),
+                        "devPwd": $("#devPwd").val(),
                     },
                     "content-type": "application/x-www-form-urlencoded",
 
                 });
             }
         </script>
+        -->
         <!-- submit delete device form -->
         <script type="text/javascript">
             function deleteDevice(){

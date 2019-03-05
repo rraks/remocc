@@ -8,6 +8,10 @@ type Env struct {
     db models.UserStore
 }
 
+type DevEnv struct {
+    db models.DeviceStore
+}
+
 type mockDB struct{}
 
 func openDB()(db *models.DB)  {
@@ -33,6 +37,7 @@ func TestDBMain(t *testing.T) {
 
     db := openDB()
     env := &Env{db}
+    devEnv := &DevEnv{db}
     t.Log("DB opened succesffully")
 
 
@@ -47,7 +52,7 @@ func TestDBMain(t *testing.T) {
     for i := 0; i<8; i++ {
         //Create test Users
         id, err := env.db.NewUser(testTables[i].Name, testTables[i].Email, 
-        testTables[i].Org, testTables[i].Grp, "temppwd")
+        testTables[i].Org, testTables[i].Grp, "temppwd", "devices_"+testTables[i].Name, "apps_"+testTables[i].Name)
         if err != nil {
             t.Errorf(err.Error())
         }
@@ -78,7 +83,19 @@ func TestDBMain(t *testing.T) {
     }
 
     //Create a table for a user
-    err = env.db.CreateTable("Yada")
+    err = env.db.CreateDevicesTable("Yada")
+    if err != nil {
+        t.Errorf(err.Error())
+    }
+
+    //Create a table for a user
+    _, err = devEnv.db.NewDevice("devices_a", "b", "ab:cd:ef:12:34:56", "d", "e", "f")
+    if err != nil {
+        t.Errorf(err.Error())
+    }
+
+    //Create a table for a user
+    err = devEnv.db.DeleteDevice("devices_a", "b" )
     if err != nil {
         t.Errorf(err.Error())
     }
@@ -98,3 +115,5 @@ func TestDBMain(t *testing.T) {
     t.Log("Deleted Group", "xyz")
 
 }
+
+
