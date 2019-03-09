@@ -18,6 +18,30 @@
         <link href="/static/dashboard.css" rel="stylesheet">
 
 
+        <!-- Bootstrap core JavaScript
+            ================================================== -->
+            <!-- Placed at the end of the document so the pages load faster -->
+            <script src="/static/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="/static/jquery.min.js"><\/script>')</script>
+            <script src="/static/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+            <script src="/static/bootstrap.min.js"></script>
+            <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+            <script src="/static/ie10-viewport-bug-workaround.js"></script>
+
+            <!-- submit delete device form -->
+            <script type="text/javascript">
+                function deleteDevice(){
+                    $.ajax({
+                        "type": 'DELETE',
+                        "url": '/user/devices/manage?'+'devName='+ $("#delDevName").val()+'&confDevName='+ $("#confDevName").val(),
+                        "content-type": "application/x-www-form-urlencoded",
+
+                    });
+                }
+            </script>
+
+
+
     </head>
 
     <body>
@@ -78,7 +102,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <form class="form-signin" id="newDeviceForm" method="POST" action="/device/">
+                                            <form class="form-signin" id="newDeviceForm" method="POST" action="/user/devices/manage/">
                                                 <label for="devName" class="sr-only">Device Name</label>
                                                 <input type="text" name="devName" id="devName" class="form-control" placeholder="name" required autofocus>
                                                 <label for="macId" class="sr-only">mac address</label>
@@ -111,7 +135,7 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <form class="form-signin" action="/device/" method="DELETE">
+                                            <form class="form-signin" action="/user/devices/manage" method="DELETE">
                                                 <label for="delDevName" class="sr-only">Device Name</label>
                                                 <input type="text" name="delDevName" id="delDevName" class="form-control" placeholder="Device Name" required autofocus>
                                                 <label for="confDevName" class="sr-only">Confirm Device Name</label>
@@ -142,57 +166,51 @@
                         </tbody>
                     </table>
 
+                    <!-- Device preview modal form -->
+                    <div class="modal fade" id="deviceModal" tabindex="-1" role="dialog" aria-labelledby="deviceModal" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" id="devPrevBody">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
+                    <script type="text/javascript">
+                        $(function(){
+                            $('#deviceModal').modal({
+                                keyboard: true,
+                                backdrop: "static",
+                                show:false,
+
+                            }).on('show.bs.modal', function(){
+                                var devName = $(event.target).closest('tr').data('id');
+                                //make your ajax call populate items or what even you need
+                                $.ajax({
+                                    type: 'get',
+                                    url: '/user/devices/data/',
+                                    data: {
+                                        devName:devName
+                                    },
+                                    success : function(res) {
+                                        $('#devPrevBody').html(res);
+                                    },
+                                    error: function() {
+                                        alert("Error");
+                                    }
+                                });
+                            });
+                        });
+                    </script>
                 </div>
                 </main>
             </div>
         </div>
-
-        <!-- Bootstrap core JavaScript
-            ================================================== -->
-            <!-- Placed at the end of the document so the pages load faster -->
-            <script src="/static/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-            <script>window.jQuery || document.write('<script src="/static/jquery.min.js"><\/script>')</script>
-            <script src="/static/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-            <script src="/static/bootstrap.min.js"></script>
-            <script src="/static/jquery.min.js"></script>
-            <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-            <script src="/static/ie10-viewport-bug-workaround.js"></script>
-
-
-
-
-        <!--
-        <!-- submit create device form -->
-        <script type="text/javascript">
-            function newDevice(){
-                $.ajax({
-                    "type": 'POST',
-                    "url": '/device/',
-                    "data": {
-                        "devName": $("#devName").val(),
-                        "macId": $("#macId").val(),
-                        "devDescr": $("#devDescr").val(),
-                        "sshKey": $("#sshKey").val(),
-                        "devPwd": $("#devPwd").val(),
-                    },
-                    "content-type": "application/x-www-form-urlencoded",
-
-                });
-            }
-        </script>
-        -->
-        <!-- submit delete device form -->
-        <script type="text/javascript">
-            function deleteDevice(){
-                $.ajax({
-                    "type": 'DELETE',
-                    "url": '/device?'+'devName='+ $("#delDevName").val()+'&confDevName='+ $("#confDevName").val(),
-                    "content-type": "application/x-www-form-urlencoded",
-
-                });
-            }
-</script>
 
 
 

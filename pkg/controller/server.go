@@ -26,16 +26,19 @@ func Start() {
     mux.HandleFunc("/logout/", LogoutHandler)
 
     // Main page Router
-    //http.HandleFunc("/", ProvideHandler(FrontPageHandler))
-    mux.HandleFunc("/", FrontPageHandler)
+    //http.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
     mux.HandleFunc("/register/", RegisterHandler)
 
-    // Device Handlers
-    //http.HandleFunc("/device/", ProvideHandler(DeviceManagerHandler))
-    mux.HandleFunc("/devices/", DeviceManagerHandler)
-    mux.HandleFunc("/devices/login/", DeviceLoginHandler)
-    mux.HandleFunc("/devices/data/", DeviceDataHandler)
+    //mux.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
+    //mux.HandleFunc("/user/devices/data/", ProvideWebHandler(UserDataHandler))
+    mux.HandleFunc("/", Testprovidehandler(FrontPageHandler))
+    mux.HandleFunc("/user/devices/data/", Testprovidehandler(UserDataHandler))
 
+    // Device Handlers
+    mux.HandleFunc("/devices/login/", DeviceLoginHandler)
+    mux.HandleFunc("/devices/data/", ProvideApiHandler(DeviceDataHandler))
+
+    mux.HandleFunc("/user/devices/manage/", DeviceManagerHandler)
 
 
     // Serve 

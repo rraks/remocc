@@ -1,0 +1,94 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            {{with .Device}}
+            <div class="d-flex justify-content-between">
+            <div>
+            <h4>
+                {{.DevName}}
+            </h4>
+            </div>
+            <div class="btn-group" role="group">
+                <button class="btn btn-success" type="button">
+                    Schedule SSH
+                </button> 
+                <button class="btn btn-primary" type="button">
+                    Launch SSH
+                </button> 
+                <button class="btn btn-danger" type="button">
+                    Stop SSH
+                </button> 
+            </div>
+            </div>
+            <div>
+            {{.DevDescr}}
+            </div>
+            {{end}}
+            <br>
+            <br>
+            <form role="form">
+                <div class="form-group">
+                    <label for="downlinkMsg">
+                        <b>Downlink Message</b>
+                    </label>
+                    <input type="text" class="form-control" id="downlinkMsg">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    Send
+                </button>
+            </form>
+            <br>
+            <br>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Timestamp</th>
+                        <th scope="col">Downlink Msg</th>
+                        <th scope="col">Uplink Msg</th>
+                        <th scope="col">Ping Time</th>
+                        <th scope="col">Tunnel Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{with .Logs}} 
+                    {{range .}}
+                    {{if .DownlinkMsg.Valid}}
+                        <tr class="table-active">
+                    {{else}}
+                        <tr class="table-primary">
+                    {{end}}
+
+                        <td>{{.LastSeen}}</td>
+
+                        {{if .DownlinkMsg.Valid }}
+                        <td>{{.DownlinkMsg.String }}</td>
+                        {{else}}
+                        <td>None</td>
+                        {{end}}
+
+                        {{if .UplinkMsg.Valid }}
+                        <td>{{.UplinkMsg.String }}</td>
+                        {{else}}
+                        <td>None</td>
+                        {{end}}
+
+                        {{if .PingTime.Valid }}
+                        <td>{{.PingTime.Int64}}</td>
+                        {{else}}
+                        <td>None</td>
+                        {{end}}
+
+                        {{if .TunnelStatus.Valid }}
+                        <td>{{.TunnelStatus}}</td>
+                        {{else}}
+                        <td>None</td>
+                        {{end}}
+                    </tr>
+                    {{end}}
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

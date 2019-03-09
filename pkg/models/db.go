@@ -19,26 +19,28 @@ const (
 
 
 type UserStore interface {
-    AllUsers() ([]*User, error)
-    AUser(string) (*User, error)
-    NewUser(string, string, string, string, string, string, string) (int, error)
-    DeleteUser(string) (error)
-    DeleteGrp(string) (error)
-    GetPwd(string) (string, error)
-    CreateAppTable(string) (error)
-    CreateDevicesTable(string) (error)
-    DeleteTable(string) (error)
+    AllUsers() (users []*User, err error)
+    AUser(email string) (user *User, err error)
+    NewUser(uName string, email string, org string, grp string, pswd string, dev string, app string) (id int, err error)
+    DeleteUser(email string) (err error)
+    DeleteGrp(grp string) (err error)
+    GetPwd(email string) (hash string, err error)
+    CreateAppTable(tableName string) (err error)
+    CreateDevicesTable(tableName string) (err error)
+    DeleteTable(tableName string) (err error)
 }
 
 
 type DeviceStore interface {
-    AllDevices(string) ([]*Device, error)
-    ADevice(string, string) (*Device, error)
-    NewDevice(string, string, string, string, string, string) (int, error)
-    DeleteDevice(string, string) (error)
-    CreateDeviceLog(string) (error)
-    DropDeviceTable(string) (error)
-    GetDevPwd(string, string) (string, error)
+    AllDevices(tableName string) (devices []*Device, err error)
+    ADevice(tableName string, devName string) (device *Device, err error)
+    NewDevice(tableName string, devName string, macId string, devDescr string, sshKey string, devPwdHash string) (serial int, err error)
+    DeleteDevice(tableName string, devName string) (err error)
+    CreateDeviceTable(tableName string) (err error)
+    DropDeviceTable(tableName string) (err error)
+    GetDevPwd(usersTable string, devName string) (hash string, err error)
+    InsertDeviceLog(tableName string, uplinkMsg string, pingTime int) (err error)
+    GetDeviceLogs( device *Device, offset int, limit int) ([]*DeviceLog, error) 
 }
 
 type DB struct {

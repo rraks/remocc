@@ -62,10 +62,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             log.Println("Failed to parse form")
         }
-        uname := r.Form["email"][0]
-        usr, err := usrEnv.db.AUser(uname)
+        email := r.Form["email"][0]
+        usr, err := usrEnv.db.AUser(email)
         if err != nil {
-            http.Redirect(w, r, "/login", http.StatusFound) // TODO: Add not found flash message
+            http.Redirect(w, r, "/login/", http.StatusFound) // TODO: Add not found flash message
             return
         }
         hash, err := usrEnv.db.GetPwd(usr.Email)

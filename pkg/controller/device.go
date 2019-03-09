@@ -1,18 +1,16 @@
 package controller
 
 //TODO :[
-//          Verify uniqueness of name
-//]
+//          Verify uniqueness of name ]
 
 import (
     "net/http"
-    "encoding/json"
     "github.com/rraks/remocc/pkg/models"
     "github.com/rraks/remocc/pkg/views"
     "log"
-    "github.com/dgrijalva/jwt-go"
-    "errors"
-    "github.com/mitchellh/mapstructure"
+    "encoding/json"
+    "github.com/patrickmn/go-cache"
+    "time"
 )
 
 
@@ -22,16 +20,21 @@ type DevEnv struct {
 
 var devEnv *DevEnv
 
-
 type DevReq struct {
-    DevName string `json: "devName"`
-    UName string `json: "uName"`
-    Pwd string `json: "pwd"`
+    NumEntries int `json: "numEntries"`
+    Offset int `json: "offset"`
+    ReqType string `json: "reqType"` // Can be "history", "heartbeat", "downlinkMsg"
+    UplinkMsg string `json: "uplinkMsg"`
+    PingTime int `json: "pingTime"`
+    DownlinkMsg string `json: "downlinkMsg"`
+    ActivateSSH bool `json: "activateSSH"`
+
 }
 
-type JWToken struct {
-    Token string `json:"token"`
-}
+
+
+var devDownlinkCache *cache.Cache
+
 
 func init() {
     db, err := models.InitDB()
@@ -39,6 +42,9 @@ func init() {
         panic(err)
     }
     devEnv = &DevEnv{db}
+
+    //Create simple downlink cache
+    devDownlinkCache = cache.New(2*time.Hour,4*time.Hour)
 }
 
 func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +74,7 @@ func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             log.Println(err)
         }
-        err = devEnv.db.CreateDeviceLog(devName) // TODO: Have a better way of creating device log
+        err = devEnv.db.CreateDeviceTable(devName) // TODO: Have a better way of creating device log
         if err != nil {
             log.Println(err)
         }
@@ -92,17 +98,7 @@ func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
 
 
 // TODO: Add a more qualified user context here instead of tableName
-func FrontPageHandler(w http.ResponseWriter, r *http.Request) {
-    tableNameCookie, err := r.Cookie("dev_table")
-    if err != nil {
-        if err == http.ErrNoCookie {
-            http.Redirect(w, r, "/login/", http.StatusFound)
-            return
-        }
-        http.Redirect(w, r, "/login/", http.StatusFound)
-        return
-    }
-    tableName := tableNameCookie.Value
+func FrontPageHandler(w http.ResponseWriter, r *http.Request, email string, tableName string) {
     allDevices, err := devEnv.db.AllDevices(tableName)
     if err != nil {
         log.Println(err)
@@ -111,54 +107,60 @@ func FrontPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
-// TODO: Make this agnostic to the user
-func DeviceLoginHandler(w http.ResponseWriter, r *http.Request) {
-    var devReq DevReq
-    json.NewDecoder(r.Body).Decode(&devReq)
-    hash, err := devEnv.db.GetDevPwd("devices_"+devReq.UName, devReq.DevName)
-    if err != nil {
-        log.Println(err)
-    }
-    match := CheckPasswordHash(devReq.Pwd, hash)
-    // Create token, TODO :check user policies
-    if match == true {
-        token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-            "uName":  devReq.UName,
-            "devName":  devReq.DevName,
-            "pwd":  devReq.Pwd,
-        })
-        tokenString, err := token.SignedString([]byte("password")) // TODO : replace in production through init 
+func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+    if r.Method == "GET" {
+        devName := r.URL.Query()["devName"][0]
+        device, err := devEnv.db.ADevice(devTable, devName)
         if err != nil {
             log.Println(err)
         }
-        json.NewEncoder(w).Encode(JWToken{Token: tokenString})
-    }
-}
-
-func DeviceDataHandler(w http.ResponseWriter, r *http.Request) {
-    key := r.Header.Get("authToken")
-    token, _ := jwt.Parse(key, func(token *jwt.Token) (interface{}, error) {
-        if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-            return nil, errors.New("Failed to validate token")
-        }
-        return []byte("password"), nil // TODO : replace in production through init
-    })
-    if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-        var devReq DevReq
-        mapstructure.Decode(claims, &devReq)
-        log.Println(devReq)
-        log.Println("Starting db check")
-        passwordHash, err := devEnv.db.GetDevPwd("devices_"+devReq.UName, devReq.DevName)
+        deviceLogs, err := devEnv.db.GetDeviceLogs(device, 0, 10)
         if err != nil {
-            log.Println("Not found")
+            log.Println(err)
         }
-        log.Println("Stopping db check")
-        if ok = CheckPasswordHash(devReq.Pwd, passwordHash); ok {
-            log.Println("Success")
+        if template, err := views.RenderDevicePreview(w, deviceLogs, device); err != nil {
+            w.Write([]byte("No Data available"))
+            return
+        } else {
+            w.Write(template)
+            return
         }
-
+        w.Write([]byte("Failed to get"))
     }
 }
 
 
+func DeviceDataHandler(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
+    var devReq DevReq
+    json.NewDecoder(r.Body).Decode(&devReq)
+
+    if r.Method == "GET" {
+    }
+
+    if r.Method == "POST" {
+        if devReq.ReqType == "heartbeat" {
+            err := devEnv.db.InsertDeviceLog(devClaims.DevName, devReq.UplinkMsg, devReq.PingTime)
+            if err != nil {
+                log.Println(err)
+                w.WriteHeader(http.StatusNotFound)
+                return
+            }
+            cacheId := devClaims.UName+"_"+devClaims.DevName
+            if val, found := devDownlinkCache.Get(cacheId); found {
+                json.NewEncoder(w).Encode(val) 
+                devDownlinkCache.Delete(cacheId)
+                return
+            }
+            w.WriteHeader(http.StatusOK)
+        }
+        if devReq.ReqType == "downlinkMsg" { // TODO : Implement queue here
+            downlinkPayload := &DevReq{ReqType:devReq.ReqType,
+                                        ActivateSSH:devReq.ActivateSSH, DownlinkMsg:devReq.DownlinkMsg}
+            cacheId := devClaims.UName+"_"+devClaims.DevName
+            devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
+            w.WriteHeader(http.StatusOK)
+        }
+
+    }
+}
 

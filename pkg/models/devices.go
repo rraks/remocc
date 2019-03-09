@@ -1,9 +1,22 @@
 package models
 
+import (
+    "time"
+    "strconv"
+    "database/sql"
+)
 
 
 type Device struct {
     DevName, MacId, DevDescr string
+}
+
+type DeviceLog struct {
+    LastSeen time.Time
+    TunnelStatus  sql.NullBool
+    UplinkMsg sql.NullString
+    DownlinkMsg sql.NullString
+    PingTime sql.NullInt64
 }
 
 
@@ -59,6 +72,28 @@ func (db *DB) ADevice(tableName string, devName string) (*Device, error) {
     return device, nil
 }
 
+func (db *DB) GetDeviceLogs( device *Device, offset int, limit int) ([]*DeviceLog, error) {
+    deviceLogs := make([]*DeviceLog, 0)
+    deviceLog := new(DeviceLog)
+    rows, err :=    db.Query("SELECT lastSeen,downlinkMsg,uplinkMsg,pingTime,tunnelStatus FROM " + device.DevName + " LIMIT " + strconv.Itoa(10) )
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    for rows.Next() {
+        err := rows.Scan(&deviceLog.LastSeen,&deviceLog.DownlinkMsg,&deviceLog.UplinkMsg, &deviceLog.PingTime, &deviceLog.TunnelStatus)
+        if err != nil {
+            return nil, err
+        }
+        deviceLogs = append(deviceLogs, deviceLog)
+    }
+    if err = rows.Err(); err != nil {
+        return nil, err
+    }
+    return deviceLogs, nil
+}
+
+
 func (db *DB) DeleteDevice(tableName string, devName string) (error) {
     _, err := db.Exec("DELETE FROM "+ tableName + " where devName=$1",devName)
     if err != nil {
@@ -77,8 +112,8 @@ func (db *DB) DropDeviceTable(tableName string) (error) {
 
 
 
-func (db *DB) CreateDeviceLog(tableName string) (error) {
-    query := "CREATE TABLE "+ tableName + " (lastSeen timestamptz NOT NULL DEFAULT now(), downlinkMsg text, uplinkMsg text, pingTime smallint )"
+func (db *DB) CreateDeviceTable(tableName string) (error) {
+    query := "CREATE TABLE "+ tableName + " (lastSeen timestamptz NOT NULL DEFAULT now(), downlinkMsg text, uplinkMsg text, pingTime smallint, tunnelStatus boolean)"
     _, err := db.Exec(query)
     if err != nil {
         return err
@@ -86,9 +121,9 @@ func (db *DB) CreateDeviceLog(tableName string) (error) {
     return nil
 }
 
-func (db *DB) GetDevPwd(userTable string, devName string) (string, error) {
+func (db *DB) GetDevPwd(usersTable string, devName string) (string, error) {
     var hash string
-    rows, err := db.Query("SELECT devPwdHash FROM " + userTable + " WHERE devName='" + devName + "'")
+    rows, err := db.Query("SELECT devPwdHash FROM " + usersTable + " WHERE devName='" + devName + "'")
     if err != nil {
         return "", err
     }
@@ -99,4 +134,14 @@ func (db *DB) GetDevPwd(userTable string, devName string) (string, error) {
         return "", err
     }
     return hash, nil
+}
+
+
+func (db *DB) InsertDeviceLog(tableName string, uplinkMsg string, pingTime int) (error) {
+    query := "INSERT INTO " + tableName + " (uplinkMsg, pingTime) VALUES ($1, $2) "
+    _, err := db.Exec(query, uplinkMsg, pingTime)
+    if err != nil {
+        return err
+    }
+    return nil
 }
