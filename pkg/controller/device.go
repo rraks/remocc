@@ -11,6 +11,7 @@ import (
     "encoding/json"
     "github.com/patrickmn/go-cache"
     "time"
+    "strconv"
 )
 
 
@@ -108,13 +109,18 @@ func FrontPageHandler(w http.ResponseWriter, r *http.Request, email string, tabl
 
 
 func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+    usr, err := usrEnv.db.AUser(email)
+    var deviceLogs []*models.DeviceLog
+    if err != nil {
+        log.Println(err)
+    }
     if r.Method == "GET" {
         devName := r.URL.Query()["devName"][0]
         device, err := devEnv.db.ADevice(devTable, devName)
         if err != nil {
             log.Println(err)
         }
-        deviceLogs, err := devEnv.db.GetDeviceLogs(device, 0, 10)
+        deviceLogs, err = devEnv.db.GetDeviceLogs(device, 0, 10)
         if err != nil {
             log.Println(err)
         }
@@ -126,6 +132,25 @@ func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTa
             return
         }
         w.Write([]byte("Failed to get"))
+    }
+    if r.Method == "POST" {
+        if err := r.ParseForm(); err != nil {
+            log.Println(err)
+        }
+        devName := r.Form["devName"][0]
+        downlinkMsg := r.Form["downlinkMsg"][0]
+        reqType := r.Form["reqType"][0]
+        activateSSH, _ := strconv.ParseBool(r.Form["activateSSH"][0])
+        if reqType == "downlinkMsg" { // TODO : Implement queue here
+            downlinkPayload := &DevReq{ReqType:reqType,ActivateSSH:activateSSH, DownlinkMsg:downlinkMsg}
+            cacheId := usr.Name+"_"+devName
+            err := devEnv.db.InsertDeviceDownlinkLog(devName, downlinkMsg)
+            if err != nil {
+                log.Println(err)
+            }
+            devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
+            w.WriteHeader(http.StatusOK)
+        }
     }
 }
 
@@ -139,7 +164,7 @@ func DeviceDataHandler(w http.ResponseWriter, r *http.Request, devClaims *DevCla
 
     if r.Method == "POST" {
         if devReq.ReqType == "heartbeat" {
-            err := devEnv.db.InsertDeviceLog(devClaims.DevName, devReq.UplinkMsg, devReq.PingTime)
+            err := devEnv.db.InsertDeviceUplinkLog(devClaims.DevName, devReq.UplinkMsg, devReq.PingTime)
             if err != nil {
                 log.Println(err)
                 w.WriteHeader(http.StatusNotFound)
@@ -157,6 +182,10 @@ func DeviceDataHandler(w http.ResponseWriter, r *http.Request, devClaims *DevCla
             downlinkPayload := &DevReq{ReqType:devReq.ReqType,
                                         ActivateSSH:devReq.ActivateSSH, DownlinkMsg:devReq.DownlinkMsg}
             cacheId := devClaims.UName+"_"+devClaims.DevName
+            err := devEnv.db.InsertDeviceDownlinkLog(devClaims.DevName, devReq.DownlinkMsg)
+            if err != nil {
+                log.Println(err)
+            }
             devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
             w.WriteHeader(http.StatusOK)
         }

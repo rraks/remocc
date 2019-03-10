@@ -23,19 +23,19 @@
             <div>
             {{.DevDescr}}
             </div>
-            {{end}}
             <br>
             <br>
-            <form role="form">
+            <form role="form" >
                 <div class="form-group">
                     <label for="downlinkMsg">
                         <b>Downlink Message</b>
                     </label>
                     <input type="text" class="form-control" id="downlinkMsg">
                 </div>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" onClick="submitDownlink({{.DevName}}, document.getElementById('downlinkMsg').value, false)">
                     Send
                 </button>
+            {{end}}
             </form>
             <br>
             <br>
@@ -52,11 +52,7 @@
                 <tbody>
                     {{with .Logs}} 
                     {{range .}}
-                    {{if .DownlinkMsg.Valid}}
-                        <tr class="table-active">
-                    {{else}}
                         <tr class="table-primary">
-                    {{end}}
 
                         <td>{{.LastSeen}}</td>
 

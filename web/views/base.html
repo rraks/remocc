@@ -39,6 +39,26 @@
                     });
                 }
             </script>
+            <script type="text/javascript">
+                function submitDownlink(devName, downlinkMsg, activateSSH){
+                    console.log("Reached on click");
+                    $.ajax({
+                        "type": 'POST',
+                        "url": '/user/devices/data/',
+                        "data": {
+                            "reqType":"downlinkMsg",
+                            "devName":devName,
+                            "activateSSH":activateSSH,
+                            "downlinkMsg":downlinkMsg
+                        },
+                        "content-type": "application/x-www-form-urlencoded",
+                        success: function(data) {
+                            console.log("Sent successfully")
+                        }
+
+                    });
+                }
+            </script>
 
 
 

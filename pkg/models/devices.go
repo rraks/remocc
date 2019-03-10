@@ -74,13 +74,13 @@ func (db *DB) ADevice(tableName string, devName string) (*Device, error) {
 
 func (db *DB) GetDeviceLogs( device *Device, offset int, limit int) ([]*DeviceLog, error) {
     deviceLogs := make([]*DeviceLog, 0)
-    deviceLog := new(DeviceLog)
-    rows, err :=    db.Query("SELECT lastSeen,downlinkMsg,uplinkMsg,pingTime,tunnelStatus FROM " + device.DevName + " LIMIT " + strconv.Itoa(10) )
+    rows, err :=    db.Query("SELECT lastSeen,downlinkMsg,uplinkMsg,pingTime,tunnelStatus FROM " + device.DevName +  " ORDER BY lastSeen DESC" + " LIMIT " + strconv.Itoa(10) )
     if err != nil {
         return nil, err
     }
     defer rows.Close()
     for rows.Next() {
+        deviceLog := new(DeviceLog)
         err := rows.Scan(&deviceLog.LastSeen,&deviceLog.DownlinkMsg,&deviceLog.UplinkMsg, &deviceLog.PingTime, &deviceLog.TunnelStatus)
         if err != nil {
             return nil, err
@@ -136,8 +136,16 @@ func (db *DB) GetDevPwd(usersTable string, devName string) (string, error) {
     return hash, nil
 }
 
+func (db *DB) InsertDeviceDownlinkLog(tableName string, downlinkMsg string ) (error) {
+    query := "INSERT INTO " + tableName + " (downlinkMsg)  VALUES ($1)"
+    _, err := db.Exec(query, downlinkMsg)
+    if err != nil {
+        return err
+    }
+    return nil
+}
 
-func (db *DB) InsertDeviceLog(tableName string, uplinkMsg string, pingTime int) (error) {
+func (db *DB) InsertDeviceUplinkLog(tableName string, uplinkMsg string, pingTime int) (error) {
     query := "INSERT INTO " + tableName + " (uplinkMsg, pingTime) VALUES ($1, $2) "
     _, err := db.Exec(query, uplinkMsg, pingTime)
     if err != nil {
