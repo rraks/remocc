@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 )
 
-func main() {
+func TestSendUplink(t *testing.T) {
 
 	url := "http://localhost:3000/devices/data/"
 
@@ -15,7 +15,7 @@ func main() {
 
 	req, _ := http.NewRequest("POST", url, payload)
 
-	req.Header.Add("authToken", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZOYW1lIjoidGVzdERldmljZTIiLCJwd2QiOiJ0ZXN0RGV2aWNlMiIsInVOYW1lIjoiYSJ9.WwpGe2ZYlCCYwi8CNxJHks7EHAZ3RK5PzzdJdZQwnsg")
+	req.Header.Add("authToken", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZOYW1lIjoidGVzdERldmljZSIsInB3ZCI6InRlc3REZXZpY2UiLCJ1TmFtZSI6ImEifQ.g-Fi7EVwty1QAowDabtgJPLtzvyqt2O5XHaXP5QYUGM")
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("Postman-Token", "da53c175-0586-4b1f-8ba8-899306bda741")

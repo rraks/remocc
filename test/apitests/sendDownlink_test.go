@@ -11,11 +11,11 @@ func TestSendDownlink(t *testing.T) {
 
 	url := "http://localhost:3000/devices/data/"
 
-	payload := strings.NewReader("{\"reqType\":\"downlinkMsg\", \"activateSSH\":true, \"downlinkMsg\":\"Test message e\"}")
+	payload := strings.NewReader("{\"reqType\":\"downlinkMsg\", \"downlinkMsg\":\"Test message e\"}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
-	req.Header.Add("authToken", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZOYW1lIjoidGVzdERldmljZTIiLCJwd2QiOiJ0ZXN0RGV2aWNlMiIsInVOYW1lIjoiYSJ9.WwpGe2ZYlCCYwi8CNxJHks7EHAZ3RK5PzzdJdZQwnsg")
+	req.Header.Add("authToken", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZOYW1lIjoidGVzdERldmljZSIsInB3ZCI6InRlc3REZXZpY2UiLCJ1TmFtZSI6ImEifQ.g-Fi7EVwty1QAowDabtgJPLtzvyqt2O5XHaXP5QYUGM")
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("cache-control", "no-cache")
 	req.Header.Add("Postman-Token", "a8e66299-b7c1-482c-94ac-6469d650fdcb")

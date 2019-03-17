@@ -39,28 +39,25 @@
                     });
                 }
             </script>
+
             <script type="text/javascript">
-                function submitDownlink(devName, downlinkMsg, activateSSH){
-                    console.log("Reached on click");
+                function submitDownlink(devName, reqType, downlinkMsg, tunnelStatus){
                     $.ajax({
                         "type": 'POST',
                         "url": '/user/devices/data/',
                         "data": {
-                            "reqType":"downlinkMsg",
+                            "reqType":reqType,
                             "devName":devName,
-                            "activateSSH":activateSSH,
+                            "tunnelStatus":tunnelStatus,
                             "downlinkMsg":downlinkMsg
                         },
                         "content-type": "application/x-www-form-urlencoded",
                         success: function(data) {
-                            console.log("Sent successfully")
                         }
 
                     });
                 }
             </script>
-
-
 
     </head>
 

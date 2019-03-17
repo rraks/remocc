@@ -13,7 +13,7 @@ type Device struct {
 
 type DeviceLog struct {
     LastSeen time.Time
-    TunnelStatus  sql.NullBool
+    TunnelStatus  sql.NullString 
     UplinkMsg sql.NullString
     DownlinkMsg sql.NullString
     PingTime sql.NullInt64
@@ -113,7 +113,7 @@ func (db *DB) DropDeviceTable(tableName string) (error) {
 
 
 func (db *DB) CreateDeviceTable(tableName string) (error) {
-    query := "CREATE TABLE "+ tableName + " (lastSeen timestamptz NOT NULL DEFAULT now(), downlinkMsg text, uplinkMsg text, pingTime smallint, tunnelStatus boolean)"
+    query := "CREATE TABLE "+ tableName + " (lastSeen timestamptz NOT NULL DEFAULT now(), downlinkMsg text, uplinkMsg text, pingTime smallint, tunnelStatus text)"
     _, err := db.Exec(query)
     if err != nil {
         return err
@@ -136,9 +136,9 @@ func (db *DB) GetDevPwd(usersTable string, devName string) (string, error) {
     return hash, nil
 }
 
-func (db *DB) InsertDeviceDownlinkLog(tableName string, downlinkMsg string ) (error) {
-    query := "INSERT INTO " + tableName + " (downlinkMsg)  VALUES ($1)"
-    _, err := db.Exec(query, downlinkMsg)
+func (db *DB) InsertDeviceDownlinkLog(tableName string, downlinkMsg string, tunnelStatus string) (error) {
+    query := "INSERT INTO " + tableName + " (downlinkMsg, tunnelStatus)  VALUES ($1, $2)"
+    _, err := db.Exec(query, downlinkMsg, tunnelStatus)
     if err != nil {
         return err
     }

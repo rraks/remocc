@@ -40,7 +40,7 @@ type DeviceStore interface {
     DropDeviceTable(tableName string) (err error)
     GetDevPwd(usersTable string, devName string) (hash string, err error)
     InsertDeviceUplinkLog(tableName string, uplinkMsg string, pingTime int) (err error)
-    InsertDeviceDownlinkLog(tableName string, downlinkMsg string) (err error)
+    InsertDeviceDownlinkLog(tableName string, downlinkMsg string, tunnelStatus string) (err error)
     GetDeviceLogs( device *Device, offset int, limit int) ([]*DeviceLog, error) 
 }
 

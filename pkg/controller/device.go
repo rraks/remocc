@@ -11,7 +11,6 @@ import (
     "encoding/json"
     "github.com/patrickmn/go-cache"
     "time"
-    "strconv"
 )
 
 
@@ -22,13 +21,18 @@ type DevEnv struct {
 var devEnv *DevEnv
 
 type DevReq struct {
-    NumEntries int `json: "numEntries"`
-    Offset int `json: "offset"`
-    ReqType string `json: "reqType"` // Can be "history", "heartbeat", "downlinkMsg"
-    UplinkMsg string `json: "uplinkMsg"`
-    PingTime int `json: "pingTime"`
-    DownlinkMsg string `json: "downlinkMsg"`
-    ActivateSSH bool `json: "activateSSH"`
+    NumEntries int `json:"numEntries"`
+    Offset int `json:"offset"`
+    ReqType string `json:"reqType"` // Can be "history", "heartbeat", "downlinkMsg"
+    UplinkMsg string `json:"uplinkMsg"`
+    PingTime int `json:"pingTime"`
+    DownlinkMsg string `json:"downlinkMsg"`
+    TunnelStatus string `json:"tunnelStatus"` // Can be "activate", "requested", "active", "closed"
+}
+
+type SSHMsg struct {
+    ReqType string `json:"reqType"` // Can be "launch", "schedule", "stop" 
+    DevName string `json:"devName"`
 
 }
 
@@ -140,16 +144,26 @@ func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTa
         devName := r.Form["devName"][0]
         downlinkMsg := r.Form["downlinkMsg"][0]
         reqType := r.Form["reqType"][0]
-        activateSSH, _ := strconv.ParseBool(r.Form["activateSSH"][0])
+        tunnelStatus := r.Form["tunnelStatus"][0]
+        downlinkPayload := &DevReq{ReqType:reqType,TunnelStatus:tunnelStatus, DownlinkMsg:downlinkMsg}
+        cacheId := usr.Name+"_"+devName
+        err := devEnv.db.InsertDeviceDownlinkLog(devName, downlinkMsg, tunnelStatus)
+        if err != nil {
+            log.Println(err)
+        }
         if reqType == "downlinkMsg" { // TODO : Implement queue here
-            downlinkPayload := &DevReq{ReqType:reqType,ActivateSSH:activateSSH, DownlinkMsg:downlinkMsg}
-            cacheId := usr.Name+"_"+devName
-            err := devEnv.db.InsertDeviceDownlinkLog(devName, downlinkMsg)
-            if err != nil {
-                log.Println(err)
-            }
             devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
             w.WriteHeader(http.StatusOK)
+        }
+        if reqType == "ssh" {
+            if tunnelStatus == "schedule" {
+                devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
+            }
+            if tunnelStatus == "launch" {
+            }
+            if tunnelStatus == "stop" {
+            }
+
         }
     }
 }
@@ -178,11 +192,26 @@ func DeviceDataHandler(w http.ResponseWriter, r *http.Request, devClaims *DevCla
             }
             w.WriteHeader(http.StatusOK)
         }
+        if devReq.ReqType == "uplinkMsg" {
+            err := devEnv.db.InsertDeviceUplinkLog(devClaims.DevName, devReq.UplinkMsg, devReq.PingTime)
+            if err != nil {
+                log.Println(err)
+                w.WriteHeader(http.StatusNotFound)
+                return
+            }
+            cacheId := devClaims.UName+"_"+devClaims.DevName
+            if val, found := devDownlinkCache.Get(cacheId); found {
+                json.NewEncoder(w).Encode(val) 
+                devDownlinkCache.Delete(cacheId)
+                return
+            }
+            w.WriteHeader(http.StatusOK)
+        }
         if devReq.ReqType == "downlinkMsg" { // TODO : Implement queue here
             downlinkPayload := &DevReq{ReqType:devReq.ReqType,
-                                        ActivateSSH:devReq.ActivateSSH, DownlinkMsg:devReq.DownlinkMsg}
+                                        TunnelStatus:devReq.TunnelStatus, DownlinkMsg:devReq.DownlinkMsg}
             cacheId := devClaims.UName+"_"+devClaims.DevName
-            err := devEnv.db.InsertDeviceDownlinkLog(devClaims.DevName, devReq.DownlinkMsg)
+            err := devEnv.db.InsertDeviceDownlinkLog(devClaims.DevName, devReq.DownlinkMsg, devReq.TunnelStatus)
             if err != nil {
                 log.Println(err)
             }
@@ -192,4 +221,3 @@ func DeviceDataHandler(w http.ResponseWriter, r *http.Request, devClaims *DevCla
 
     }
 }
-

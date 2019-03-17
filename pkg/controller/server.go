@@ -41,6 +41,7 @@ func Start() {
     mux.HandleFunc("/user/devices/manage/", DeviceManagerHandler)
 
 
+
     // Serve 
     log.Fatal(http.ListenAndServe(":3000", mux))
 }
