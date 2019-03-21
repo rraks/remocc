@@ -10,12 +10,15 @@ import (
 
 
 const (
-    host = "localhost"
+    host = "172.17.0.1"
     port = 5432
     user = "postgres"
     password = "password"
-    dbname = "users"
+    dbname = "remocc"
 )
+
+// Create users table in postgres using
+// create table users(id SERIAL, name VARCHAR(255), email TEXT, orgname VARCHAR(255), groupname VARCHAR(255), password VARCHAR(255), dev TEXT, app TEXT)
 
 
 type UserStore interface {
