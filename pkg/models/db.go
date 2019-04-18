@@ -10,11 +10,11 @@ import (
 
 
 const (
-    host = "172.17.0.1"
+    host = "db"
     port = 5432
     user = "postgres"
-    password = "password"
     dbname = "remocc"
+    password = "remocc"
 )
 
 // Create users table in postgres using
