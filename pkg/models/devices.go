@@ -8,7 +8,7 @@ import (
 
 
 type Device struct {
-    DevName, MacId, DevDescr string
+    DevName, MacId, DevDescr, SSHKey string
 }
 
 type DeviceLog struct {
@@ -37,14 +37,14 @@ func (db *DB) NewDevice(tableName string, devName string, macId string, devDescr
 
 func (db *DB) AllDevices(tableName string) ([]*Device, error) {
     devices := make([]*Device, 0)
-    rows, err := db.Query("SELECT devName,macId,devDescr FROM " + tableName)
+    rows, err := db.Query("SELECT devName,macId,devDescr,sshKey FROM " + tableName)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
     for rows.Next() {
         device := new(Device)
-        err := rows.Scan(&device.DevName,&device.MacId,&device.DevDescr)
+        err := rows.Scan(&device.DevName,&device.MacId,&device.DevDescr, &device.SSHKey)
         if err != nil {
             return nil, err
         }
@@ -59,13 +59,13 @@ func (db *DB) AllDevices(tableName string) ([]*Device, error) {
 
 func (db *DB) ADevice(tableName string, devName string) (*Device, error) {
     device := new(Device)
-    rows, err := db.Query("SELECT devName,macId,devDescr FROM " + tableName + " where devName=$1", devName)
+    rows, err := db.Query("SELECT devName,macId,devDescr,sshKey FROM " + tableName + " where devName=$1", devName)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
     rows.Next()
-    err = rows.Scan(&device.DevName,&device.MacId,&device.DevDescr)
+    err = rows.Scan(&device.DevName,&device.MacId,&device.DevDescr,&device.SSHKey)
     if err != nil {
         return nil, err
     }

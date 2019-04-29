@@ -7,15 +7,17 @@ import (
     "log"
     "bytes"
     "html/template"
+    "os"
 )
 
 
 var tableView *View
 var deviceView *View
+var baseDir = ""
 
 func init() {
-  tableView = NewView("base", "web/views/templates/deviceTableRow.html")
-  tableView = NewView("base", "web/views/templates/deviceTableRow.html")
+    baseDir = os.Getenv("BASE_DIR")
+    tableView = NewView("base", baseDir+"web/views/templates/deviceTableRow.html")
 }
 
 
@@ -34,7 +36,7 @@ func RenderTableRow(w http.ResponseWriter, Devs []*models.Device) {
 
 func RenderDevicePreview(w http.ResponseWriter, logs []*models.DeviceLog, device *models.Device) ([]byte, error) {
     t := template.New("action")
-    t, err := template.ParseFiles("web/views/templates/deviceView.html")
+    t, err := template.ParseFiles(baseDir+"web/views/templates/deviceView.html")
     if err != nil {
         return []byte("Failed to fetch template"), err
     }

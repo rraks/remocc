@@ -1,5 +1,6 @@
 package tests
 
+// Assumes environment is set from source ../setenv.sh 
 import (
     "testing"
     "github.com/rraks/remocc/pkg/models"

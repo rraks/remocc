@@ -17,11 +17,18 @@ services:
       - "3000:3000"
     restart: on-failure
     environment:
+      - POSTGRES_HOST=db
       - POSTGRES_DB=remocc
-      - POSTGRES_PASSWORD=remocc
       - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=remocc
+      - POSTGRES_PORT=5432
+      - AUTHORIZED_KEYS=/root/.ssh/authorized_keys
+      - SSHD_CMD=/usr/sbin/sshd
     networks: 
       - remocc-net
+    volumes: 
+      - ./setup/sshd/sshd_on_start.sh:/docker-entrypoint-initdb.d/init.sh
+    command: bash -c "/docker-entrypoint-initdb.d/init.sh && /go/src/github.com/rraks/remocc/remocc"
 
   
   db:
@@ -30,9 +37,11 @@ services:
       -  postgres-data:/var/lib/postgresql
       - ./setup/pg/pgsql_install.sh:/docker-entrypoint-initdb.d/init_db.sh
     environment:
+      - POSTGRES_HOST=db
       - POSTGRES_DB=remocc
-      - POSTGRES_PASSWORD=remocc
       - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=remocc
+      - POSTGRES_PORT=5432
     ports:
       - "5432:5432"
     networks: 

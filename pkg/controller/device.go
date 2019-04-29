@@ -38,6 +38,7 @@ type SSHMsg struct {
 
 
 
+
 var devDownlinkCache *cache.Cache
 
 
@@ -51,6 +52,11 @@ func init() {
     //Create simple downlink cache
     devDownlinkCache = cache.New(2*time.Hour,4*time.Hour)
 }
+
+func removeSSHKey(sshKey string) {
+
+}
+
 
 func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
     tableNameCookie, err := r.Cookie("dev_table")
@@ -158,6 +164,12 @@ func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTa
         if reqType == "ssh" {
             if tunnelStatus == "schedule" {
                 devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
+                device, err := devEnv.db.ADevice(devTable, devName)
+                if err != nil {
+                    log.Println("SSH Key not found")
+                }
+                log.Println("Adding Key")
+                AddKey(device.SSHKey)
             }
             if tunnelStatus == "launch" {
             }

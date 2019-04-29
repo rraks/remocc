@@ -5,17 +5,12 @@ import (
     "database/sql"
     _ "github.com/lib/pq"
     "fmt"
+    "os"
+    "strconv"
 )
 
 
 
-const (
-    host = "db"
-    port = 5432
-    user = "postgres"
-    dbname = "remocc"
-    password = "remocc"
-)
 
 // Create users table in postgres using
 // create table users(id SERIAL, name VARCHAR(255), email TEXT, orgname VARCHAR(255), groupname VARCHAR(255), password VARCHAR(255), dev TEXT, app TEXT)
@@ -53,6 +48,11 @@ type DB struct {
 
 
 func InitDB() (*DB, error) {
+    host := os.Getenv("POSTGRES_HOST")
+    port, _ := strconv.Atoi(os.Getenv("POSTGRES_PORT"))
+    user := os.Getenv("POSTGRES_USER")
+    dbname := os.Getenv("POSTGRES_DB")
+    password := os.Getenv("POSTGRES_PASSWORD")
     psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
     "password=%s dbname=%s sslmode=disable",
     host, port, user, password, dbname)
