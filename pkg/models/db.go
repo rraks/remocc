@@ -19,7 +19,7 @@ import (
 type UserStore interface {
     AllUsers() (users []*User, err error)
     AUser(email string) (user *User, err error)
-    NewUser(uName string, email string, org string, grp string, pswd string, dev string, app string) (id int, err error)
+    NewUser(uName string, email string, org string, grp string, pswd string, sshKey string, dev string, app string) (id int, err error)
     DeleteUser(email string) (err error)
     DeleteGrp(grp string) (err error)
     GetPwd(email string) (hash string, err error)

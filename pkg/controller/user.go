@@ -91,12 +91,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
         name := r.Form["name"][0]
         pswd := r.Form["password"][0]
         cnfmpswd := r.Form["confPassword"][0]
+        sshKey := r.Form["sshKey"][0]
         email := r.Form["email"][0]
         email_tbl := strings.Replace(email,"@","_",-1)
         email_tbl = strings.Replace(email_tbl,".","_",-1)
         if  (pswd == cnfmpswd) {
             hashpwd, _ := HashPassword(pswd)
-            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "devices_"+email_tbl, "app_"+email_tbl)
+            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, sshKey, "devices_"+email_tbl, "app_"+email_tbl)
             if err != nil {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return 
@@ -107,7 +108,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return
             }
-            AddUser(email, pswd)
+            AddUser(email, pswd, sshKey)
             http.Redirect(w, r, "/login/", http.StatusFound)
             return
         }

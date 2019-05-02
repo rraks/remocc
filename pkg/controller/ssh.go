@@ -48,7 +48,7 @@ func genRandomPort() string {
     return rexp.FindString(iface.Addr().String())
 }
 
-func AddKey(email string,sshKey string) string {
+func AddDeviceKey(email_tbl string,sshKey string) string {
     sshdMutx.Lock()
     port := genRandomPort()
     cfg := &AuthKey{port, sshKey}
@@ -57,9 +57,7 @@ func AddKey(email string,sshKey string) string {
     if err != nil {
         log.Println("Failed to execute template")
     }
-    email = strings.Replace(email,"@","_",-1)
-    email = strings.Replace(email,".","_",-1)
-    authKeysFile := "/home/"+email+"/.ssh/authorized_keys"
+    authKeysFile := "/home/"+email_tbl+"/.ssh/authorized_keys"
 
     f, err := os.OpenFile(authKeysFile, os.O_APPEND|os.O_WRONLY, 0600)
     if err != nil {
@@ -73,7 +71,22 @@ func AddKey(email string,sshKey string) string {
     return port
 }
 
-func AddUser(email string, password string) {
+func AddUserKey(email_tbl string,sshKey string) {
+    sshdMutx.Lock()
+    authKeysFile := "/home/"+email_tbl+"/.ssh/authorized_keys"
+
+    f, err := os.OpenFile(authKeysFile, os.O_APPEND|os.O_WRONLY, 0600)
+    if err != nil {
+        panic(err)
+    }
+    defer f.Close()
+    if _, err = f.WriteString(sshKey); err != nil {
+        panic(err)
+      }
+    sshdMutx.Unlock()
+}
+
+func AddUser(email string, password string, sshKey string) {
     var b2 bytes.Buffer
     email_tbl := strings.Replace(email,"@","_",-1)
     email_tbl = strings.Replace(email_tbl,".","_",-1)
@@ -100,4 +113,5 @@ func AddUser(email string, password string) {
 
     exe_cmd("mkdir", "/home/"+email_tbl+"/.ssh")
     exe_cmd("touch", "/home/"+email_tbl+"/.ssh/authorized_keys")
+    AddUserKey(email_tbl, sshKey)
 }

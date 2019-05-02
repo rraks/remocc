@@ -12,12 +12,12 @@ type User struct {
 
 
 
-func (db *DB) NewUser(name string, email string, org string, grp string, pswd string, dev string, app string) (int, error) {
+func (db *DB) NewUser(name string, email string, org string, grp string, pswd string, sshKey string, dev string, app string) (int, error) {
     _, err := db.Query("SELECT name,email,orgname,groupname FROM users WHERE Email='" + email + "'")
     if err == nil{
-        query := "INSERT INTO users (name, email, orgname, groupname, password, dev, app) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+        query := "INSERT INTO users (name, email, orgname, groupname, password, sshKey, dev, app) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id"
         id := 0
-        err := db.QueryRow(query, name, email, org, grp, pswd, dev, app).Scan(&id)
+        err := db.QueryRow(query, name, email, org, grp, pswd, sshKey, dev, app).Scan(&id)
         if err != nil {
             return id, err
         }

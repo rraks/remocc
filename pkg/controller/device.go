@@ -178,7 +178,7 @@ func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTa
                 if err != nil {
                     log.Println("SSH Key not found")
                 }
-                port := AddKey(email, device.SSHKey)
+                port := AddDeviceKey(email_tbl, device.SSHKey)
                 sshReq := &SSHReq{ReqType:reqType,Port:port}
                 devDownlinkCache.Set(cacheId, sshReq, cache.DefaultExpiration)
                 log.Println("Adding Key")
