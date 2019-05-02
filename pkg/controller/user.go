@@ -8,6 +8,7 @@ import (
     "net/http"
     "log"
     "github.com/rraks/remocc/pkg/models"
+    "strings"
 )
 
 
@@ -88,22 +89,25 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
             http.Redirect(w, r, "/register/", http.StatusFound)
         }
         name := r.Form["name"][0]
-        email := r.Form["email"][0]
         pswd := r.Form["password"][0]
         cnfmpswd := r.Form["confPassword"][0]
+        email := r.Form["email"][0]
+        email_tbl := strings.Replace(email,"@","_",-1)
+        email_tbl = strings.Replace(email_tbl,".","_",-1)
         if  (pswd == cnfmpswd) {
             hashpwd, _ := HashPassword(pswd)
-            err1 := usrEnv.db.CreateDevicesTable("devices_"+name) // TODO: Replace with hash of email instead of name
-            err2 := usrEnv.db.CreateAppTable("apps_"+name)
-            if (err1 != nil) && (err2 != nil) {
-                http.Redirect(w, r, "/register/", http.StatusFound)
-                return
-            }
-            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "devices_"+name, "app_"+name)
+            _, err := usrEnv.db.NewUser(name, email, "default", "default", hashpwd, "devices_"+email_tbl, "app_"+email_tbl)
             if err != nil {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return 
             }
+            err1 := usrEnv.db.CreateDevicesTable("devices_"+email_tbl) // TODO: Replace with hash of email instead of name
+            err2 := usrEnv.db.CreateAppTable("apps_"+email_tbl)
+            if (err1 != nil) && (err2 != nil) {
+                http.Redirect(w, r, "/register/", http.StatusFound)
+                return
+            }
+            AddUser(email, pswd)
             http.Redirect(w, r, "/login/", http.StatusFound)
             return
         }

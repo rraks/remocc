@@ -17,10 +17,10 @@ FROM alpine
 RUN apk --update add --no-cache openssh bash \
   && sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config \
   && echo "root:root" | chpasswd \
-  && rm -rf /var/cache/apk/*
-RUN /usr/bin/ssh-keygen -A
-RUN ssh-keygen -t rsa -b 4096 -f  /etc/ssh/ssh_host_key
-RUN mkdir /root/.ssh && touch /root/.ssh/authorized_keys
+  && rm -rf /var/cache/apk/* \
+  && /usr/bin/ssh-keygen -A \
+  && ssh-keygen -t rsa -b 4096 -f  /etc/ssh/ssh_host_key \
+  && mkdir /root/.ssh && touch /root/.ssh/authorized_keys
 COPY ./setup/sshd/sshd_config ./root/.ssh/sshd_config
 ### Copy built image to final image
 COPY --from=builder /go/src/github.com/rraks/remocc/ /go/src/github.com/rraks/remocc/

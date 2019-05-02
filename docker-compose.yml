@@ -22,8 +22,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=remocc
       - POSTGRES_PORT=5432
-      - AUTHORIZED_KEYS=/root/.ssh/authorized_keys
-      - SSHD_CMD=/usr/sbin/sshd
     networks: 
       - remocc-net
     volumes: 

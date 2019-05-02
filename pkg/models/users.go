@@ -13,13 +13,17 @@ type User struct {
 
 
 func (db *DB) NewUser(name string, email string, org string, grp string, pswd string, dev string, app string) (int, error) {
-    query := "INSERT INTO users (name, email, orgname, groupname, password, dev, app) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
-    id := 0
-    err := db.QueryRow(query, name, email, org, grp, pswd, dev, app).Scan(&id)
-    if err != nil {
-        return id, err
+    _, err := db.Query("SELECT name,email,orgname,groupname FROM users WHERE Email='" + email + "'")
+    if err == nil{
+        query := "INSERT INTO users (name, email, orgname, groupname, password, dev, app) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id"
+        id := 0
+        err := db.QueryRow(query, name, email, org, grp, pswd, dev, app).Scan(&id)
+        if err != nil {
+            return id, err
+        }
+        return id, nil
     }
-    return id, nil
+    return -1,err
 }
 
 

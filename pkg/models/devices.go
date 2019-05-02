@@ -72,9 +72,9 @@ func (db *DB) ADevice(tableName string, devName string) (*Device, error) {
     return device, nil
 }
 
-func (db *DB) GetDeviceLogs( device *Device, offset int, limit int) ([]*DeviceLog, error) {
+func (db *DB) GetDeviceLogs( devTableName string, offset int, limit int) ([]*DeviceLog, error) {
     deviceLogs := make([]*DeviceLog, 0)
-    rows, err :=    db.Query("SELECT lastSeen,downlinkMsg,uplinkMsg,pingTime,tunnelStatus FROM " + device.DevName +  " ORDER BY lastSeen DESC" + " LIMIT " + strconv.Itoa(10) )
+    rows, err :=    db.Query("SELECT lastSeen,downlinkMsg,uplinkMsg,pingTime,tunnelStatus FROM " + devTableName +  " ORDER BY lastSeen DESC" + " LIMIT " + strconv.Itoa(10) )
     if err != nil {
         return nil, err
     }
@@ -113,7 +113,7 @@ func (db *DB) DropDeviceTable(tableName string) (error) {
 
 
 func (db *DB) CreateDeviceTable(tableName string) (error) {
-    query := "CREATE TABLE "+ tableName + " (lastSeen timestamptz NOT NULL DEFAULT now(), downlinkMsg text, uplinkMsg text, pingTime smallint, tunnelStatus text)"
+    query := "CREATE TABLE "+ tableName + " (lastSeen timestamptz NOT NULL DEFAULT now(), downlinkMsg text, uplinkMsg text, pingTime smallint, tunnelStatus text, sshPort text)"
     _, err := db.Exec(query)
     if err != nil {
         return err

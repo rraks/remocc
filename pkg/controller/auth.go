@@ -13,6 +13,7 @@ import (
     "errors"
     "encoding/json"
     "github.com/mitchellh/mapstructure"
+    "strings"
 )
 
 var usrAuthCache *cache.Cache
@@ -20,7 +21,7 @@ var usrAuthCache *cache.Cache
 
 type DevClaims struct {
     DevName string `json: "devName"`
-    UName string `json: "uName"`
+    Email string `json: "email"`
     Pwd string `json: "pwd"`
 }
 
@@ -48,9 +49,11 @@ func CheckPasswordHash(password, hash string) bool {
 func LogSession(w http.ResponseWriter, usr *models.User) {
     sessionToken := uuid.NewV4().String()
     usrAuthCache.Set(usr.Email, sessionToken, cache.DefaultExpiration)
+    email_tbl := strings.Replace(usr.Email,"@","_",-1)
+    email_tbl = strings.Replace(email_tbl,".","_",-1)
     http.SetCookie(w, &http.Cookie{
         Name:    "dev_table",
-        Value:   "devices_" + usr.Name,
+        Value:   "devices_" + email_tbl,
         Path: "/",
     })
     http.SetCookie(w, &http.Cookie{
@@ -69,7 +72,7 @@ func LogSession(w http.ResponseWriter, usr *models.User) {
 
 func Testprovidehandler(fn func(http.ResponseWriter, *http.Request, string, string)) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-                fn(w, r, "a@a.com", "devices_a")
+                fn(w, r, "a@a.com", "devices_a_a_com")
     }
 }
 
@@ -103,7 +106,9 @@ func ProvideWebHandler(fn func(http.ResponseWriter, *http.Request, string, strin
 func DeviceLoginHandler(w http.ResponseWriter, r *http.Request) {
     var devClaims DevClaims
     json.NewDecoder(r.Body).Decode(&devClaims)
-    hash, err := devEnv.db.GetDevPwd("devices_"+devClaims.UName, devClaims.DevName)
+    email_tbl := strings.Replace(devClaims.Email,"@","_",-1)
+    email_tbl = strings.Replace(email_tbl,".","_",-1)
+    hash, err := devEnv.db.GetDevPwd("devices_"+email_tbl, devClaims.DevName)
     if err != nil {
         log.Println(err)
     }
@@ -111,7 +116,7 @@ func DeviceLoginHandler(w http.ResponseWriter, r *http.Request) {
     // Create token, TODO :check user policies
     if match == true {
         token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-            "uName":  devClaims.UName,
+            "email":  devClaims.Email,
             "devName":  devClaims.DevName,
             "pwd":  devClaims.Pwd,
         })
@@ -136,7 +141,9 @@ func ProvideApiHandler(fn func(http.ResponseWriter, *http.Request, *DevClaims)) 
         if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
             var devClaims DevClaims
             mapstructure.Decode(claims, &devClaims)
-            passwordHash, err := devEnv.db.GetDevPwd("devices_"+devClaims.UName, devClaims.DevName)
+            email_tbl := strings.Replace(devClaims.Email,"@","_",-1)
+            email_tbl = strings.Replace(email_tbl,".","_",-1)
+            passwordHash, err := devEnv.db.GetDevPwd("devices_"+email_tbl, devClaims.DevName)
             if err != nil {
                 w.Write([]byte("Invalid authorization"))
             }

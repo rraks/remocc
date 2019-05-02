@@ -29,10 +29,10 @@ func Start() {
     //http.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
     mux.HandleFunc("/register/", RegisterHandler)
 
-    //mux.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
-    //mux.HandleFunc("/user/devices/data/", ProvideWebHandler(UserDataHandler))
-    mux.HandleFunc("/", Testprovidehandler(FrontPageHandler))
-    mux.HandleFunc("/user/devices/data/", Testprovidehandler(UserDataHandler))
+    mux.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
+    mux.HandleFunc("/user/devices/data/", ProvideWebHandler(UserDataHandler))
+    //mux.HandleFunc("/", Testprovidehandler(FrontPageHandler))
+    //mux.HandleFunc("/user/devices/data/", Testprovidehandler(UserDataHandler))
 
     // Device Handlers
     mux.HandleFunc("/devices/login/", DeviceLoginHandler)

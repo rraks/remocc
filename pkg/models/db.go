@@ -39,7 +39,7 @@ type DeviceStore interface {
     GetDevPwd(usersTable string, devName string) (hash string, err error)
     InsertDeviceUplinkLog(tableName string, uplinkMsg string, pingTime int) (err error)
     InsertDeviceDownlinkLog(tableName string, downlinkMsg string, tunnelStatus string) (err error)
-    GetDeviceLogs( device *Device, offset int, limit int) ([]*DeviceLog, error) 
+    GetDeviceLogs( devTableName string, offset int, limit int) ([]*DeviceLog, error) 
 }
 
 type DB struct {
