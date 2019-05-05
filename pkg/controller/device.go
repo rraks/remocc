@@ -21,22 +21,35 @@ type DevEnv struct {
 
 var devEnv *DevEnv
 
-type DevReq struct {
+
+type UsrListDevsReq struct {
     NumEntries int `json:"numEntries"`
     Offset int `json:"offset"`
-    ReqType string `json:"reqType"` // Can be "history", "heartbeat", "downlinkMsg"
-    UplinkMsg string `json:"uplinkMsg"`
-    PingTime int `json:"pingTime"`
+}
+
+type DownlinkReq struct {
     DownlinkMsg string `json:"downlinkMsg"`
-    TunnelStatus string `json:"tunnelStatus"` // Can be "activate", "requested", "active", "closed"
 }
 
-
-// TODO : Make message structures more clear
-type SSHReq struct {
+type DownlinkResp struct {
     Port string `json:"port"`
-    ReqType string `json:"reqType"`
+    DownlinkMsg string `json:"downlinkMsg"`
+    RespType string `json:"reqType"` // schedule, stop or downlink
 }
+
+type SSHReq struct {
+    TunnelStatus string `json:"tunnelStatus"` // schedule, launch, stop 
+}
+
+type UplinkReq struct {
+    UplinkMsg string `json:"uplinkMsg"`
+}
+
+type HeartBeatReq struct {
+    PingTime int `json:"pingTime"`
+}
+
+
 
 
 
@@ -54,10 +67,12 @@ func init() {
     devDownlinkCache = cache.New(2*time.Hour,4*time.Hour)
 }
 
-func removeSSHKey(sshKey string) {
 
+func getEmailTableName(email string) (string) {
+    email_tbl := strings.Replace(email,"@","_",-1)
+    email_tbl = strings.Replace(email_tbl,".","_",-1)
+    return email_tbl
 }
-
 
 func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
     emailCookie, err := r.Cookie("email")
@@ -88,8 +103,7 @@ func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             log.Println(err)
         }
-        email_tbl := strings.Replace(email,"@","_",-1)
-        email_tbl = strings.Replace(email_tbl,".","_",-1)
+        email_tbl := getEmailTableName(email)
         err = devEnv.db.CreateDeviceTable(email_tbl+"_"+devName) // TODO: Have a better way of creating device log
         if err != nil {
             log.Println(err)
@@ -123,7 +137,7 @@ func FrontPageHandler(w http.ResponseWriter, r *http.Request, email string, tabl
 }
 
 
-func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+func GetDeviceInfo(w http.ResponseWriter, r *http.Request, email string, devTable string) {
     usr, err := usrEnv.db.AUser(email)
     email_tbl := strings.Replace(usr.Email,"@","_",-1)
     email_tbl = strings.Replace(email_tbl,".","_",-1)
@@ -151,98 +165,103 @@ func UserDataHandler(w http.ResponseWriter, r *http.Request, email string, devTa
         }
         w.Write([]byte("Failed to get"))
     }
+}
+
+func SendDeviceDownlink(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+    usr, err := usrEnv.db.AUser(email)
+    email_tbl := strings.Replace(usr.Email,"@","_",-1)
+    email_tbl = strings.Replace(email_tbl,".","_",-1)
+    if err != nil {
+        log.Println(err)
+    }
     if r.Method == "POST" {
         if err := r.ParseForm(); err != nil {
             log.Println(err)
         }
         devName := r.Form["devName"][0]
         downlinkMsg := r.Form["downlinkMsg"][0]
-        reqType := r.Form["reqType"][0]
-        tunnelStatus := r.Form["tunnelStatus"][0]
-        downlinkPayload := &DevReq{ReqType:reqType,TunnelStatus:tunnelStatus, DownlinkMsg:downlinkMsg}
+        email_tbl := getEmailTableName(usr.Email)
+        cacheId := email_tbl+"_"+devName
+        err := devEnv.db.InsertDeviceDownlinkLog(email_tbl+"_"+devName, downlinkMsg, "")
+        if err != nil {
+            log.Println(err)
+        }
+        downlinkPayload := &DownlinkResp{RespType:"downlink", DownlinkMsg:downlinkMsg}
+        devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
+        w.WriteHeader(http.StatusOK)
+    }
+}
 
-        email_tbl := strings.Replace(usr.Email,"@","_",-1)
-        email_tbl = strings.Replace(email_tbl,".","_",-1)
+func SendSSHRequest(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+    email_tbl := getEmailTableName(email)
+    if r.Method == "POST" {
+        if err := r.ParseForm(); err != nil {
+            log.Println(err)
+        }
+        devName := r.Form["devName"][0]
+        downlinkMsg := r.Form["downlinkMsg"][0]
+        tunnelStatus := r.Form["tunnelStatus"][0]
         cacheId := email_tbl+"_"+devName
         err := devEnv.db.InsertDeviceDownlinkLog(email_tbl+"_"+devName, downlinkMsg, tunnelStatus)
         if err != nil {
             log.Println(err)
         }
-        if reqType == "downlinkMsg" { // TODO : Implement queue here
-            devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
-            w.WriteHeader(http.StatusOK)
+        if tunnelStatus == "schedule" {
+            device, err := devEnv.db.ADevice(devTable, devName)
+            if err != nil {
+                log.Println("SSH Key not found")
+            }
+            port := AddDeviceKey(email_tbl, device.SSHKey)
+            sshReq := &DownlinkResp{RespType:tunnelStatus,Port:port}
+            devDownlinkCache.Set(cacheId, sshReq, cache.DefaultExpiration)
         }
-        if reqType == "ssh" {
-            if tunnelStatus == "schedule" {
-                device, err := devEnv.db.ADevice(devTable, devName)
-                if err != nil {
-                    log.Println("SSH Key not found")
-                }
-                port := AddDeviceKey(email_tbl, device.SSHKey)
-                sshReq := &SSHReq{ReqType:reqType,Port:port}
-                devDownlinkCache.Set(cacheId, sshReq, cache.DefaultExpiration)
-                log.Println("Adding Key")
-            }
-            if tunnelStatus == "launch" {
-            }
-            if tunnelStatus == "stop" {
-            }
-
+        if tunnelStatus == "launch" {
+        }
+        if tunnelStatus == "stop" {
         }
     }
 }
 
-
-func DeviceDataHandler(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
-    var devReq DevReq
-    json.NewDecoder(r.Body).Decode(&devReq)
-    email_tbl := strings.Replace(devClaims.Email,"@","_",-1)
-    email_tbl = strings.Replace(email_tbl,".","_",-1)
-    if r.Method == "GET" {
-    }
-
+func SendHeartBeat(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
+    var heartBeatReq HeartBeatReq
+    json.NewDecoder(r.Body).Decode(&heartBeatReq)
+    email_tbl := getEmailTableName(devClaims.Email)
     if r.Method == "POST" {
-        if devReq.ReqType == "heartbeat" {
-            err := devEnv.db.InsertDeviceUplinkLog(email_tbl+"_"+devClaims.DevName, devReq.UplinkMsg, devReq.PingTime)
-            if err != nil {
-                log.Println(err)
-                w.WriteHeader(http.StatusNotFound)
-                return
-            }
-            cacheId := email_tbl+"_"+devClaims.DevName
-            if val, found := devDownlinkCache.Get(cacheId); found {
-                json.NewEncoder(w).Encode(val) 
-                devDownlinkCache.Delete(cacheId)
-                return
-            }
-            w.WriteHeader(http.StatusOK)
+        err := devEnv.db.InsertDeviceUplinkLog(email_tbl+"_"+devClaims.DevName, "", heartBeatReq.PingTime)
+        if err != nil {
+            log.Println(err)
+            w.WriteHeader(http.StatusNotFound)
+            return
         }
-        if devReq.ReqType == "uplinkMsg" {
-            err := devEnv.db.InsertDeviceUplinkLog(devClaims.Email+"_"+devClaims.DevName, devReq.UplinkMsg, devReq.PingTime)
-            if err != nil {
-                log.Println(err)
-                w.WriteHeader(http.StatusNotFound)
-                return
-            }
-            cacheId := email_tbl+"_"+devClaims.DevName
-            if val, found := devDownlinkCache.Get(cacheId); found {
-                json.NewEncoder(w).Encode(val) 
-                devDownlinkCache.Delete(cacheId)
-                return
-            }
-            w.WriteHeader(http.StatusOK)
+        cacheId := email_tbl+"_"+devClaims.DevName
+        if val, found := devDownlinkCache.Get(cacheId); found {
+            json.NewEncoder(w).Encode(val)
+            devDownlinkCache.Delete(cacheId)
+            return
         }
-        if devReq.ReqType == "downlinkMsg" { // TODO : Implement queue here
-            downlinkPayload := &DevReq{ReqType:devReq.ReqType,
-                                        TunnelStatus:devReq.TunnelStatus, DownlinkMsg:devReq.DownlinkMsg}
-            cacheId := email_tbl+"_"+devClaims.DevName
-            err := devEnv.db.InsertDeviceDownlinkLog(email_tbl+"_"+devClaims.DevName, devReq.DownlinkMsg, devReq.TunnelStatus)
-            if err != nil {
-                log.Println(err)
-            }
-            devDownlinkCache.Set(cacheId, downlinkPayload, cache.DefaultExpiration)
-            w.WriteHeader(http.StatusOK)
-        }
-
+        w.WriteHeader(http.StatusOK)
     }
+}
+
+func SendUplink(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
+    var  uplinkReq UplinkReq
+    json.NewDecoder(r.Body).Decode(&uplinkReq)
+    email_tbl := getEmailTableName(devClaims.Email)
+    if r.Method == "POST" {
+        err := devEnv.db.InsertDeviceUplinkLog(email_tbl+"_"+devClaims.DevName, uplinkReq.UplinkMsg, -1)
+        if err != nil {
+            log.Println(err)
+            w.WriteHeader(http.StatusNotFound)
+            return
+        }
+        cacheId := email_tbl+"_"+devClaims.DevName
+        // Return back msg of typle UsrDownlinkResp
+        if val, found := devDownlinkCache.Get(cacheId); found {
+            json.NewEncoder(w).Encode(val)
+            devDownlinkCache.Delete(cacheId)
+            return
+        }
+        w.WriteHeader(http.StatusOK)
+    }
+
 }

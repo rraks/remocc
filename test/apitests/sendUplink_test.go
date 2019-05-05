@@ -9,16 +9,15 @@ import (
 
 func TestSendUplink(t *testing.T) {
 
-	url := "http://localhost:3000/devices/data/"
+	url := "http://localhost:3000/devices/data/heartbeat/"
 
 	payload := strings.NewReader("{\"reqType\":\"heartbeat\", \"pingTime\":10}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 
-	req.Header.Add("authToken", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZOYW1lIjoidGVzdERldmljZSIsInB3ZCI6InRlc3REZXZpY2UiLCJ1TmFtZSI6ImEifQ.g-Fi7EVwty1QAowDabtgJPLtzvyqt2O5XHaXP5QYUGM")
+	req.Header.Add("authToken", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZOYW1lIjoidGVzdERldmljZSIsImVtYWlsIjoiYUBhLmNvbSIsInB3ZCI6InRlc3REZXZpY2UifQ.ugYStYg2HBCyg2DyvGgbmZrofBdVWLlY5HQcX_Q12gI")
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("cache-control", "no-cache")
-	req.Header.Add("Postman-Token", "da53c175-0586-4b1f-8ba8-899306bda741")
 
 	res, _ := http.DefaultClient.Do(req)
 

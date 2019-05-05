@@ -11,7 +11,7 @@ func TestGetJWT(t *testing.T) {
 
     url := "http://localhost:3000/devices/login/"
 
-    payload := strings.NewReader("{\"devName\":\"testDevice\", \"uName\":\"a\", \"pwd\":\"testDevice\"}")
+    payload := strings.NewReader("{\"devName\":\"testDevice\", \"email\":\"a@a.com\", \"pwd\":\"testDevice\"}")
 
     req, _ := http.NewRequest("GET", url, payload)
 

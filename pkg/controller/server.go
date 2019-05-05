@@ -26,17 +26,25 @@ func Start() {
     mux.HandleFunc("/logout/", LogoutHandler)
 
     // Main page Router
-    //http.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
     mux.HandleFunc("/register/", RegisterHandler)
 
+    //Test Handlers
+//    mux.HandleFunc("/", Testprovidehandler(FrontPageHandler))
+//    mux.HandleFunc("/user/devices/info/", Testprovidehandler(GetDeviceInfo))
+//    mux.HandleFunc("/user/devices/downlink/", Testprovidehandler(SendDeviceDownlink))
+//    mux.HandleFunc("/user/devices/ssh/", Testprovidehandler(SendSSHRequest))
+
+    // Actual
     mux.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
-    mux.HandleFunc("/user/devices/data/", ProvideWebHandler(UserDataHandler))
-    //mux.HandleFunc("/", Testprovidehandler(FrontPageHandler))
-    //mux.HandleFunc("/user/devices/data/", Testprovidehandler(UserDataHandler))
+    mux.HandleFunc("/user/devices/info/", ProvideWebHandler(GetDeviceInfo))
+    mux.HandleFunc("/user/devices/downlink/", ProvideWebHandler(SendDeviceDownlink))
+    mux.HandleFunc("/user/devices/ssh/", ProvideWebHandler(SendSSHRequest))
 
     // Device Handlers
     mux.HandleFunc("/devices/login/", DeviceLoginHandler)
-    mux.HandleFunc("/devices/data/", ProvideApiHandler(DeviceDataHandler))
+
+    mux.HandleFunc("/devices/data/heartbeat/", ProvideApiHandler(SendHeartBeat))
+    mux.HandleFunc("/devices/data/uplink/", ProvideApiHandler(SendUplink))
 
     mux.HandleFunc("/user/devices/manage/", DeviceManagerHandler)
 

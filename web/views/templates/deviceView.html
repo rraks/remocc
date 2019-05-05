@@ -9,14 +9,14 @@
             </h4>
             </div>
             <div class="btn-group" role="group">
-                <button class="btn btn-primary" type="button" onClick="submitDownlink({{.DevName}}, 'ssh', '','schedule')">
+                <button class="btn btn-primary" type="button" onClick="submitSSHRequest({{.DevName}}, 'ssh', '','schedule')">
  
                     Schedule SSH
                 </button> 
-                <button class="btn btn-success" type="button" onClick="submitDownlink({{.DevName}}, 'ssh', '', 'launch')">
+                <button class="btn btn-success" type="button" onClick="submitSSHRequest({{.DevName}}, 'ssh', '', 'launch')">
                     Launch SSH
                 </button> 
-                <button class="btn btn-danger" type="button" onClick="submitDownlink({{.DevName}}, 'ssh', '', 'stop')">
+                <button class="btn btn-danger" type="button" onClick="submitSSHRequest({{.DevName}}, 'ssh', '', 'stop')">
                     Stop SSH
                 </button> 
             </div>
@@ -25,6 +25,22 @@
             {{.DevDescr}}
             </div>
             <br>
+            <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Tunnel Status</th>
+                        <th scope="col">Port</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr class="table-primary">
+                        <td> </td>
+                        <td> </td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
             <br>
             <form role="form" >
                 <div class="form-group">
