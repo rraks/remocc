@@ -29,6 +29,29 @@ services:
       - ./setup/sshd/sshd_on_start.sh:/docker-entrypoint-initdb.d/init.sh
     command: bash -c "/docker-entrypoint-initdb.d/init.sh && /go/src/github.com/rraks/remocc/remocc"
 
+  webdev:
+    build: ./Dockerfile.devel
+    depends_on:
+      - "db"
+    ports:
+      - "3000:3000"
+    restart: on-failure
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=remocc
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=remocc
+      - POSTGRES_PORT=5432
+      - JWT_PASSWORD=password
+    networks: 
+      - remocc-net
+    volumes: 
+      - ./setup/sshd/sshd_on_start.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./:/remocc/
+    build:
+      dockerfile: Dockerfile.devel
+      context: .
+    command: tail -F anything
   
   db:
     image: postgres
