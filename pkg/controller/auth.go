@@ -14,9 +14,12 @@ import (
     "encoding/json"
     "github.com/mitchellh/mapstructure"
     "strings"
+    "os"
 )
 
 var usrAuthCache *cache.Cache
+
+var jwtPassword string
 
 
 type DevClaims struct {
@@ -32,6 +35,7 @@ type JWToken struct {
 
 func init() {
     usrAuthCache = cache.New(2*time.Hour,4*time.Hour)
+    jwtPassword = os.Getenv("JWT_PASSWORD")
 }
 
 
@@ -120,7 +124,7 @@ func DeviceLoginHandler(w http.ResponseWriter, r *http.Request) {
             "devName":  devClaims.DevName,
             "pwd":  devClaims.Pwd,
         })
-        tokenString, err := token.SignedString([]byte("password")) // TODO : replace in production through init 
+        tokenString, err := token.SignedString([]byte(jwtPassword)) // TODO : replace in production through init 
         if err != nil {
             log.Println(err)
         }
@@ -136,7 +140,7 @@ func ProvideApiHandler(fn func(http.ResponseWriter, *http.Request, *DevClaims)) 
             if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
                 return nil, errors.New("Failed to validate token")
             }
-            return []byte("password"), nil // TODO : replace in production through init
+            return []byte(jwtPassword), nil // TODO : replace in production through init
         })
         if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
             var devClaims DevClaims

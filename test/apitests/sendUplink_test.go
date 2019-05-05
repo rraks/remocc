@@ -9,9 +9,9 @@ import (
 
 func TestSendUplink(t *testing.T) {
 
-	url := "http://localhost:3000/devices/data/heartbeat/"
+	url := "http://localhost:3000/devices/data/uplink/"
 
-	payload := strings.NewReader("{\"reqType\":\"heartbeat\", \"pingTime\":10}")
+    payload := strings.NewReader("{\"uplinkMsg\":\"yada\", \"pingTime\":10}")
 
 	req, _ := http.NewRequest("POST", url, payload)
 

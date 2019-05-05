@@ -22,6 +22,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=remocc
       - POSTGRES_PORT=5432
+      - JWT_PASSWORD=password
     networks: 
       - remocc-net
     volumes: 
