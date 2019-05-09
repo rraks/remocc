@@ -13,10 +13,11 @@ type Device struct {
 
 type DeviceLog struct {
     LastSeen time.Time
-    TunnelStatus  sql.NullString 
+    TunnelStatus  sql.NullString
     UplinkMsg sql.NullString
     DownlinkMsg sql.NullString
     PingTime sql.NullInt64
+    Port sql.NullString
 }
 
 
@@ -152,4 +153,29 @@ func (db *DB) InsertDeviceUplinkLog(tableName string, uplinkMsg string, pingTime
         return err
     }
     return nil
+}
+
+func (db *DB) InsertDeviceSSHLog(tableName string, tunnelStatus string, sshPort string) (error) {
+    query := "INSERT INTO " + tableName + " (tunnelStatus, sshPort) VALUES ($1, $2) "
+    _, err := db.Exec(query, tunnelStatus, sshPort)
+    if err != nil {
+        return err
+    }
+    return nil
+}
+
+func (db *DB) GetLatestSSHStatus(tableName string, tunnelStatus string) (*DeviceLog, error) {
+    devLog := new(DeviceLog)
+    rows, err := db.Query("SELECT lastSeen,tunnelStatus,sshPort FROM " +
+                            tableName + " WHERE tunnelStatus='" + tunnelStatus +  "' ORDER BY lastSeen DESC LIMIT 1")
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    rows.Next()
+    err = rows.Scan(&devLog.LastSeen, &devLog.TunnelStatus, &devLog.Port)
+    if err != nil {
+        return nil, err
+    }
+    return devLog, nil
 }

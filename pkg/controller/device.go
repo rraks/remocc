@@ -37,8 +37,10 @@ type DownlinkResp struct {
     RespType string `json:"reqType"` // schedule, stop or downlink
 }
 
+// Used my device and web, web ignores port
 type SSHReq struct {
     TunnelStatus string `json:"tunnelStatus"` // schedule, launch, stop 
+    Port string `json:"port"`
 }
 
 type UplinkReq struct {
@@ -86,6 +88,7 @@ func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     email := emailCookie.Value
+    email_tbl := getEmailTableName(email)
     tableName := tableNameCookie.Value
     err = r.ParseForm()
     if err != nil{
@@ -103,21 +106,21 @@ func DeviceManagerHandler(w http.ResponseWriter, r *http.Request) {
         if err != nil {
             log.Println(err)
         }
-        email_tbl := getEmailTableName(email)
         err = devEnv.db.CreateDeviceTable(email_tbl+"_"+devName) // TODO: Have a better way of creating device log
         if err != nil {
             log.Println(err)
         }
     }
+    // TODO: Delete SSH key as well
     if r.Method == "DELETE" {
         devName := r.URL.Query().Get("devName")
         confDevName := r.URL.Query().Get("confDevName")
         if devName == confDevName {
-            err = devEnv.db.DeleteDevice(tableName, devName)
+            err = devEnv.db.DeleteDevice(email_tbl+"_"+tableName, devName)
             if err != nil {
                 log.Println(err)
             }
-            err = devEnv.db.DropDeviceTable(devName)
+            err = devEnv.db.DropDeviceTable(email_tbl+"_"+devName)
             if err != nil {
                 log.Println(err)
             }
@@ -138,13 +141,8 @@ func FrontPageHandler(w http.ResponseWriter, r *http.Request, email string, tabl
 
 
 func GetDeviceInfo(w http.ResponseWriter, r *http.Request, email string, devTable string) {
-    usr, err := usrEnv.db.AUser(email)
-    email_tbl := strings.Replace(usr.Email,"@","_",-1)
-    email_tbl = strings.Replace(email_tbl,".","_",-1)
+    email_tbl := getEmailTableName(email)
     var deviceLogs []*models.DeviceLog
-    if err != nil {
-        log.Println(err)
-    }
     if r.Method == "GET" {
         devName := r.URL.Query()["devName"][0]
         device, err := devEnv.db.ADevice(devTable, devName)
@@ -166,6 +164,51 @@ func GetDeviceInfo(w http.ResponseWriter, r *http.Request, email string, devTabl
         w.Write([]byte("Failed to get"))
     }
 }
+
+func GetDeviceSSHStatus(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+    email_tbl := getEmailTableName(email)
+    if r.Method == "GET" {
+        devName := r.URL.Query()["devName"][0]
+        device, err := devEnv.db.ADevice(devTable, devName)
+        if err != nil {
+            log.Println("GetDeviceSSHStatus",err)
+        }
+        deviceStopLog, err := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "stop")
+        if err != nil {
+            log.Println("deviceStopLog",err)
+        }
+        deviceLaunchLog, err := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "launch")
+        if err != nil {
+            log.Println("deviceLaunchLog",err)
+        }
+        deviceScheduleLog, _ := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "schedule")
+        if err != nil {
+            log.Println("deviceScheduleLog",err)
+        }
+		if (deviceScheduleLog != nil) && (deviceLaunchLog != nil ) {
+			if(deviceStopLog.LastSeen.After(deviceLaunchLog.LastSeen)) {
+				val := &SSHReq{Port:"", TunnelStatus:"stopped"}
+				json.NewEncoder(w).Encode(val)
+				return
+			}
+			if(deviceLaunchLog.LastSeen.After(deviceScheduleLog.LastSeen)) {
+				val := &SSHReq{Port:deviceLaunchLog.Port.String, TunnelStatus:"launch"}
+				json.NewEncoder(w).Encode(val)
+				return
+			} else {
+				val := &SSHReq{Port:"", TunnelStatus:"scheduled"}
+				json.NewEncoder(w).Encode(val)
+				return
+			}
+		} else {
+				val := &SSHReq{Port:"", TunnelStatus:"sleep"}
+				json.NewEncoder(w).Encode(val)
+				return
+		}
+
+    }
+}
+
 
 func SendDeviceDownlink(w http.ResponseWriter, r *http.Request, email string, devTable string) {
     usr, err := usrEnv.db.AUser(email)
@@ -206,11 +249,12 @@ func SendSSHRequest(w http.ResponseWriter, r *http.Request, email string, devTab
         if err != nil {
             log.Println(err)
         }
+        device, err := devEnv.db.ADevice(devTable, devName)
         if tunnelStatus == "schedule" {
-            device, err := devEnv.db.ADevice(devTable, devName)
             if err != nil {
                 log.Println("SSH Key not found")
             }
+            err = DelDeviceKey(email_tbl, device.SSHKey)
             port := AddDeviceKey(email_tbl, device.SSHKey)
             sshReq := &DownlinkResp{RespType:tunnelStatus,Port:port}
             devDownlinkCache.Set(cacheId, sshReq, cache.DefaultExpiration)
@@ -218,6 +262,9 @@ func SendSSHRequest(w http.ResponseWriter, r *http.Request, email string, devTab
         if tunnelStatus == "launch" {
         }
         if tunnelStatus == "stop" {
+            log.Println("Stopping SSH Tunnel")
+            err = DelDeviceKey(email_tbl, device.SSHKey)
+            log.Println("Stopped")
         }
     }
 }
@@ -264,4 +311,22 @@ func SendUplink(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
         w.WriteHeader(http.StatusOK)
     }
 
+}
+
+func MakeTunnelRequest(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
+    var  sshReq SSHReq
+    json.NewDecoder(r.Body).Decode(&sshReq)
+    email_tbl := getEmailTableName(devClaims.Email)
+    log.Println("Reached make tunnel request")
+    if r.Method == "POST" {
+        log.Println("Inserting Tunnel request log \t", sshReq)
+        err := devEnv.db.InsertDeviceSSHLog(email_tbl+"_"+devClaims.DevName, sshReq.TunnelStatus, sshReq.Port)
+        if err != nil {
+            log.Println(err)
+            w.WriteHeader(http.StatusNotFound)
+            return
+        }
+        //TODO : Make port availability check, etc
+        w.WriteHeader(http.StatusOK)
+    }
 }

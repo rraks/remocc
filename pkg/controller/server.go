@@ -37,6 +37,7 @@ func Start() {
     // Actual
     mux.HandleFunc("/", ProvideWebHandler(FrontPageHandler))
     mux.HandleFunc("/user/devices/info/", ProvideWebHandler(GetDeviceInfo))
+    mux.HandleFunc("/user/devices/info/ssh/", ProvideWebHandler(GetDeviceSSHStatus))
     mux.HandleFunc("/user/devices/downlink/", ProvideWebHandler(SendDeviceDownlink))
     mux.HandleFunc("/user/devices/ssh/", ProvideWebHandler(SendSSHRequest))
 
@@ -45,6 +46,7 @@ func Start() {
 
     mux.HandleFunc("/devices/data/heartbeat/", ProvideApiHandler(SendHeartBeat))
     mux.HandleFunc("/devices/data/uplink/", ProvideApiHandler(SendUplink))
+    mux.HandleFunc("/devices/data/ssh/", ProvideApiHandler(MakeTunnelRequest))
 
     mux.HandleFunc("/user/devices/manage/", DeviceManagerHandler)
 

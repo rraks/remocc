@@ -11,6 +11,7 @@ import (
     "bytes"
     "strings"
     "io"
+    "io/ioutil"
 )
 
 type AuthKey struct {
@@ -25,10 +26,9 @@ func init() {
     tmpl, _ = template.New("authKeyTempl").Parse("command=" +
                 "\"echo 'This account can only be used for [reverse tunneling]'\"," +
                 "no-agent-forwarding,no-X11-forwarding," +
-                "permitlisten=\"localhost:{{.Port}}\",permitopen=\"localhost:{{.Port}}\" {{.Key}}\n")
+                "permitlisten=\"localhost:{{.Port}}\",permitopen=\"localhost:{{.Port}}\" {{.Key}} deviceKey\n")
     // Start the openssh server (No RC in docker image)
     //_ = exe_cmd(sshdCmd)
-
 }
 
 
@@ -50,7 +50,9 @@ func genRandomPort() string {
 
 func AddDeviceKey(email_tbl string,sshKey string) string {
     sshdMutx.Lock()
+    log.Println("Adding Device key")
     port := genRandomPort()
+    log.Println("Random port ", port)
     cfg := &AuthKey{port, sshKey}
     entry := new(bytes.Buffer)
     err := tmpl.Execute(entry, cfg)
@@ -71,19 +73,42 @@ func AddDeviceKey(email_tbl string,sshKey string) string {
     return port
 }
 
-func AddUserKey(email_tbl string,sshKey string) {
+func AddUserKey(email_tbl string, sshKey string) {
     sshdMutx.Lock()
     authKeysFile := "/home/"+email_tbl+"/.ssh/authorized_keys"
-
     f, err := os.OpenFile(authKeysFile, os.O_APPEND|os.O_WRONLY, 0600)
     if err != nil {
         panic(err)
     }
     defer f.Close()
-    if _, err = f.WriteString(sshKey); err != nil {
+    if _, err = f.WriteString(sshKey + " userKey"); err != nil {
         panic(err)
       }
     sshdMutx.Unlock()
+}
+
+func DelDeviceKey(email_tbl string, sshKey string) (error) {
+    sshdMutx.Lock()
+    authKeysFile := "/home/"+email_tbl+"/.ssh/authorized_keys"
+    input, err := ioutil.ReadFile(authKeysFile)
+    if err != nil {
+        log.Println("Auth file not found")
+    }
+    authKeys := strings.Split(string(input), "\n")
+    for i, key := range authKeys {
+        if strings.Contains(key, sshKey) {
+            if strings.Contains(key,"deviceKey") {
+            authKeys = append(authKeys[:i], authKeys[i+1:]...)
+            }
+        }
+    }
+    output := strings.Join(authKeys, "\n")
+    err = ioutil.WriteFile(authKeysFile, []byte(output), 0600)
+    if err != nil {
+        log.Println("Failed deleting key")
+    }
+    sshdMutx.Unlock()
+    return err
 }
 
 func AddUser(email string, password string, sshKey string) {
