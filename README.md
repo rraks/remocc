@@ -27,7 +27,7 @@ a mechanism to access a shell to the remote device and in addition allows you to
 2. Use test device if necessary \
 `docker-compose up device`
 3. Exec and run test device \
-`docker exec -it remocc_device_1 /bin/bash ` \ 
+`docker exec -it remocc_device_1 /bin/bash `\
 `CGO_ENABLED=0 go build ./` \
 `./device`
 
@@ -37,7 +37,7 @@ a mechanism to access a shell to the remote device and in addition allows you to
 2. Exech bash to webdev  \
 ` docker exec -it remocc_webdev_1 /bin/bash`
 3. Compile and run \
-` CGO_ENABLED=0 go build ./`
+` CGO_ENABLED=0 go build ./` \
 `./remocc`
 
 
