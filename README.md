@@ -1,21 +1,22 @@
 # remocc
 Remote command and control framework
-Manage remote devices residing on private networks
-*Still under development*
+Manage remote devices residing on private networks \
+*Still under development* \
 <p align="center">
-![alt text](/docs/logo.png "remocc")
+<img src="https://github.com/rraks/remocc/blob/master/docs/logo.png">
+<img docs/logo.png >
 </p>
 
 ## Overview
 It's often difficult to manage a remote device (on LTE/Private networks). remocc provides 
 a mechanism to access a shell to the remote device and in addition allows you to run apps (remote cron tasks) on your devices.
 <p align="center">
-![alt text](/docs/overview.png "")
+<img src="https://github.com/rraks/remocc/blob/master/docs/overview.png">
 </p>
 
 ## How? Reverse SSH Tunnels
 <p align="center">
-![alt text](/docs/reverse.png "")
+<img src="https://github.com/rraks/remocc/blob/master/docs/reverse.png" >
 </p>
 
 
