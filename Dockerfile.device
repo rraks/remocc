@@ -1,0 +1,16 @@
+# Multistage docker image
+
+## Build go binary for alpine 
+FROM golang:1.11.9-alpine3.9 AS builder
+WORKDIR /go/src/github.com/rraks/remocc/
+ENV GO111MODULE=on
+RUN apk --update add --no-cache openssh bash \
+  && sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config \
+  && echo "root:root" | chpasswd \
+  && rm -rf /var/cache/apk/* \
+  && /usr/bin/ssh-keygen -A \
+  && ssh-keygen -t rsa -b 4096 -f  /etc/ssh/ssh_host_key \
+  && mkdir /root/.ssh && touch /root/.ssh/authorized_keys
+COPY ./test/sshtests/id_rsa.pub /root/.ssh/id_rsa.pub
+COPY ./test/sshtests/id_rsa /root/.ssh/id_rsa
+

@@ -1,6 +1,9 @@
 package controller
 
 
+// auth.go
+// Provides authorization closures and structures for tokens/claims 
+
 import (
     "net/http"
     "github.com/satori/go.uuid"
@@ -17,17 +20,20 @@ import (
     "os"
 )
 
+// Memory cache for user session tokens
 var usrAuthCache *cache.Cache
 
+// JWT signing password
 var jwtPassword string
 
-
+// Claims structure for devices claiming a JWT
 type DevClaims struct {
     DevName string `json: "devName"`
     Email string `json: "email"`
     Pwd string `json: "pwd"`
 }
 
+// JWT response message structure
 type JWToken struct {
     Token string `json:"token"`
 }
@@ -38,18 +44,20 @@ func init() {
     jwtPassword = os.Getenv("JWT_PASSWORD")
 }
 
-
+// Simple BCrypt hash to store user and device passwords
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 7)
 	return string(bytes), err
 }
 
+// Check BCrypt hash by matching
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
 
+// Log a users web session via cookies
 func LogSession(w http.ResponseWriter, usr *models.User) {
     sessionToken := uuid.NewV4().String()
     usrAuthCache.Set(usr.Email, sessionToken, cache.DefaultExpiration)
@@ -74,12 +82,16 @@ func LogSession(w http.ResponseWriter, usr *models.User) {
 
 
 
+// A test closure to  wrap web functions for testing. A user "a" with email "a@a.com" password "a" is used
 func Testprovidehandler(fn func(http.ResponseWriter, *http.Request, string, string)) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
                 fn(w, r, "a@a.com", "devices_a_a_com")
     }
 }
 
+// Closure to provide web content. Checks for cookies and returns to the requester the requested page
+// if user's session token is present in usrAuthCache. Also provides to the API function the users email and the device table name
+// TODO: No need of device table. It can be constructed from user email
 func ProvideWebHandler(fn func(http.ResponseWriter, *http.Request, string, string)) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         tokenCook, err1 := r.Cookie("session_token")
@@ -106,7 +118,10 @@ func ProvideWebHandler(fn func(http.ResponseWriter, *http.Request, string, strin
 
 
 
+// Provides JWT token when presented with valid device claims. Checks device name, user's email, and devices password
+// to return back a JWT 
 // TODO: Make this agnostic to the user
+// TODO: Add token validity period
 func DeviceLoginHandler(w http.ResponseWriter, r *http.Request) {
     var devClaims DevClaims
     json.NewDecoder(r.Body).Decode(&devClaims)
@@ -133,6 +148,8 @@ func DeviceLoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 
+// Closure to provide requested API for devices. Checks for JWT token claims and services the requested api if
+// token is valid. In addition, provides the devices claim to the underlying API
 func ProvideApiHandler(fn func(http.ResponseWriter, *http.Request, *DevClaims)) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         key := r.Header.Get("authToken")
@@ -159,6 +176,3 @@ func ProvideApiHandler(fn func(http.ResponseWriter, *http.Request, *DevClaims)) 
         w.Write([]byte("Invalid authorization"))
     }
 }
-
-
-

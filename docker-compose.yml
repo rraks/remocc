@@ -70,3 +70,15 @@ services:
       - remocc-net
 
 
+  device:
+    build: ./Dockerfile.device
+    restart: on-failure
+    networks: 
+      - remocc-net
+    build:
+      dockerfile: Dockerfile.device
+      context: .
+    hostname: testDevice
+    volumes:
+      -  ./pkg/device/:/go/src/github.com/rraks/remocc/
+    command: bash -c "/usr/sbin/sshd && tail -F anything"

@@ -1,6 +1,7 @@
-package main
+package tests
 
 import (
+    "testing"
 	"strings"
 	"net/http"
     "time"
@@ -65,7 +66,7 @@ func SendSSHReq(port string, jwt string) (map[string]interface{}) {
 }
 
 
-func main() {
+func runloop(t *testing.T) {
     var devName = "testDevice"
     var email = "a@a.com"
     var devPassword = "a@a.com"
@@ -90,4 +91,9 @@ func main() {
         }
         time.Sleep(5*time.Second)
     }
+}
+
+
+func TestDeviceFlowMain(t *testing.T) {
+    runloop(t)
 }

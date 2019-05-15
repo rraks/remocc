@@ -28,7 +28,7 @@ func Start() {
     // Main page Router
     mux.HandleFunc("/register/", RegisterHandler)
 
-    //Test Handlers
+//Test Handlers
 //    mux.HandleFunc("/", Testprovidehandler(FrontPageHandler))
 //    mux.HandleFunc("/user/devices/info/", Testprovidehandler(GetDeviceInfo))
 //    mux.HandleFunc("/user/devices/downlink/", Testprovidehandler(SendDeviceDownlink))
@@ -40,6 +40,7 @@ func Start() {
     mux.HandleFunc("/user/devices/info/ssh/", ProvideWebHandler(GetDeviceSSHStatus))
     mux.HandleFunc("/user/devices/downlink/", ProvideWebHandler(SendDeviceDownlink))
     mux.HandleFunc("/user/devices/ssh/", ProvideWebHandler(SendSSHRequest))
+    mux.HandleFunc("/user/devices/manage/", ProvideWebHandler(DeviceManagerHandler))
 
     // Device Handlers
     mux.HandleFunc("/devices/login/", DeviceLoginHandler)
@@ -48,7 +49,6 @@ func Start() {
     mux.HandleFunc("/devices/data/uplink/", ProvideApiHandler(SendUplink))
     mux.HandleFunc("/devices/data/ssh/", ProvideApiHandler(MakeTunnelRequest))
 
-    mux.HandleFunc("/user/devices/manage/", DeviceManagerHandler)
 
 
 

@@ -168,10 +168,10 @@ func (db *DB) GetLatestSSHStatus(tableName string, tunnelStatus string) (*Device
     devLog := new(DeviceLog)
     rows, err := db.Query("SELECT lastSeen,tunnelStatus,sshPort FROM " +
                             tableName + " WHERE tunnelStatus='" + tunnelStatus +  "' ORDER BY lastSeen DESC LIMIT 1")
+    defer rows.Close()
     if err != nil {
         return nil, err
     }
-    defer rows.Close()
     rows.Next()
     err = rows.Scan(&devLog.LastSeen, &devLog.TunnelStatus, &devLog.Port)
     if err != nil {

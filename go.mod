@@ -10,8 +10,9 @@ require (
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/satori/go.uuid v1.2.0
+	github.com/sparrc/go-ping v0.0.0-20181106165434-ef3ab45e41b0
 	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
-	golang.org/x/crypto v0.0.0-20190222235706-ffb98f73852f
-	golang.org/x/sys v0.0.0-20190222171317-cd391775e71e // indirect
+	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
+	golang.org/x/net v0.0.0-20190509222800-a4d6f7feada5 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

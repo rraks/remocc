@@ -50,9 +50,7 @@ func genRandomPort() string {
 
 func AddDeviceKey(email_tbl string,sshKey string) string {
     sshdMutx.Lock()
-    log.Println("Adding Device key")
     port := genRandomPort()
-    log.Println("Random port ", port)
     cfg := &AuthKey{port, sshKey}
     entry := new(bytes.Buffer)
     err := tmpl.Execute(entry, cfg)
@@ -81,7 +79,7 @@ func AddUserKey(email_tbl string, sshKey string) {
         panic(err)
     }
     defer f.Close()
-    if _, err = f.WriteString(sshKey + " userKey"); err != nil {
+    if _, err = f.WriteString(sshKey + " userKey" + "\n"); err != nil {
         panic(err)
       }
     sshdMutx.Unlock()
@@ -98,7 +96,7 @@ func DelDeviceKey(email_tbl string, sshKey string) (error) {
     for i, key := range authKeys {
         if strings.Contains(key, sshKey) {
             if strings.Contains(key,"deviceKey") {
-            authKeys = append(authKeys[:i], authKeys[i+1:]...)
+                authKeys = append(authKeys[:i], authKeys[i+1:]...)
             }
         }
     }
@@ -115,7 +113,6 @@ func AddUser(email string, password string, sshKey string) {
     var b2 bytes.Buffer
     email_tbl := strings.Replace(email,"@","_",-1)
     email_tbl = strings.Replace(email_tbl,".","_",-1)
-
     // Pipe commands, make function
     c1 := exec.Command("echo","-e",password+"\n"+password)
     c2 := exec.Command("adduser", email_tbl)
@@ -128,14 +125,12 @@ func AddUser(email string, password string, sshKey string) {
     c1.Wait()
     w.Close()
     c2.Wait()
-
     if err1 != nil {
         log.Println(err1)
     }
     if err2 != nil {
         log.Println(err2)
     }
-
     exe_cmd("mkdir", "/home/"+email_tbl+"/.ssh")
     exe_cmd("touch", "/home/"+email_tbl+"/.ssh/authorized_keys")
     AddUserKey(email_tbl, sshKey)
