@@ -7,7 +7,7 @@ Manage remote devices residing on private networks
 <img docs/logo.png >
 </p>
 
-*Still under development*
+*Still under development, open to collaborations*
 
 ## Overview
 It's often difficult to manage a remote device (on LTE/Private networks). remocc provides 
