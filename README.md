@@ -1,6 +1,6 @@
 # remocc
 Remote command and control framework
-Manage remote devices residing on private networks \
+Manage remote devices residing on private networks
 
 <p align="center">
 <img src="https://github.com/rraks/remocc/blob/master/docs/logo.png">
