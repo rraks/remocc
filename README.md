@@ -1,11 +1,13 @@
 # remocc
 Remote command and control framework
 Manage remote devices residing on private networks \
-*Still under development* \
+
 <p align="center">
 <img src="https://github.com/rraks/remocc/blob/master/docs/logo.png">
 <img docs/logo.png >
 </p>
+
+*Still under development*
 
 ## Overview
 It's often difficult to manage a remote device (on LTE/Private networks). remocc provides 
