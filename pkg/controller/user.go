@@ -8,6 +8,7 @@ import (
     "net/http"
     "log"
     "github.com/rraks/remocc/pkg/models"
+    "github.com/rraks/remocc/pkg/ssh"
     "strings"
 )
 
@@ -108,7 +109,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
                 http.Redirect(w, r, "/register/", http.StatusFound)
                 return
             }
-            AddUser(email, pswd, sshKey)
+            ssh.AddUser(email, pswd, sshKey)
             http.Redirect(w, r, "/login/", http.StatusFound)
             return
         }

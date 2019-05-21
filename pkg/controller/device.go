@@ -12,6 +12,8 @@ import (
     "github.com/patrickmn/go-cache"
     "time"
     "strings"
+    "github.com/rraks/remocc/pkg/ssh"
+    "github.com/rraks/remocc/pkg/scheduler"
 )
 
 // Downlink cache for all devices
@@ -231,8 +233,12 @@ func SendSSHRequest(w http.ResponseWriter, r *http.Request, email string, devTab
             if err != nil {
                 log.Println("SSH Key not found")
             }
-            err = DelDeviceKey(email_tbl, device.SSHKey)
-            port := AddDeviceKey(email_tbl, device.SSHKey)
+            err = ssh.DelDeviceKey(email_tbl, device.SSHKey)
+            port := ssh.AddDeviceKey(email_tbl, device.SSHKey)
+            sch := new(scheduler.Sched)
+            //TODO: Add device session time
+            sch.InitScheduler(time.Hour*1, ssh.DelDeviceKey, email_tbl, device.SSHKey)
+            sch.Start()
             sshReq := &DownlinkReq{RespType:tunnelStatus,Port:port}
             devDownlinkCache.Set(cacheId, sshReq, cache.DefaultExpiration)
         }
@@ -240,7 +246,7 @@ func SendSSHRequest(w http.ResponseWriter, r *http.Request, email string, devTab
         }
         if tunnelStatus == "stop" {
             log.Println("Stopping SSH Tunnel")
-            err = DelDeviceKey(email_tbl, device.SSHKey)
+            err = ssh.DelDeviceKey(email_tbl, device.SSHKey)
             log.Println("Stopped")
         }
     }
