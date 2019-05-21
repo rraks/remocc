@@ -1,21 +1,24 @@
 # remocc
 Remote command and control framework
 Manage remote devices residing on private networks
-*Still under development*
+
 <p align="center">
-![alt text](/docs/logo.png "remocc")
+<img src="https://github.com/rraks/remocc/blob/master/docs/logo.png">
+<img docs/logo.png >
 </p>
+
+*Still under development, open to collaborations*
 
 ## Overview
 It's often difficult to manage a remote device (on LTE/Private networks). remocc provides 
 a mechanism to access a shell to the remote device and in addition allows you to run apps (remote cron tasks) on your devices.
 <p align="center">
-![alt text](/docs/overview.png "")
+<img src="https://github.com/rraks/remocc/blob/master/docs/overview.png">
 </p>
 
 ## How? Reverse SSH Tunnels
 <p align="center">
-![alt text](/docs/reverse.png "")
+<img src="https://github.com/rraks/remocc/blob/master/docs/reverse.png" >
 </p>
 
 
@@ -26,7 +29,7 @@ a mechanism to access a shell to the remote device and in addition allows you to
 2. Use test device if necessary \
 `docker-compose up device`
 3. Exec and run test device \
-`docker exec -it remocc_device_1 /bin/bash ` \ 
+`docker exec -it remocc_device_1 /bin/bash `\
 `CGO_ENABLED=0 go build ./` \
 `./device`
 
@@ -36,7 +39,7 @@ a mechanism to access a shell to the remote device and in addition allows you to
 2. Exech bash to webdev  \
 ` docker exec -it remocc_webdev_1 /bin/bash`
 3. Compile and run \
-` CGO_ENABLED=0 go build ./`
+` CGO_ENABLED=0 go build ./` \
 `./remocc`
 
 
