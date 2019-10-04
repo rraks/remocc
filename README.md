@@ -36,10 +36,14 @@ a mechanism to access a shell to the remote device and in addition allows you to
 ### Development
 1. Bring up db and webdev containers \
 `docker-compose up webdev db`
-2. Exech bash to webdev  \
-` docker exec -it remocc_webdev_1 /bin/bash`
+2. Connect to the docker instance
+`docker exec -it remocc_webdev_1 /bin/bash`
+3. Start the sshd daemon 
+`./docker-entrypoint-initdb.d/init.sh`
 3. Compile and run \
 ` CGO_ENABLED=0 go build ./` \
 `./remocc`
-
-
+4. Exec and run test device \
+`docker exec -it remocc_device_1 /bin/bash `\
+`CGO_ENABLED=0 go build ./` \
+`./device`
