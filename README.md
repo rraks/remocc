@@ -39,7 +39,7 @@ a mechanism to access a shell to the remote device and in addition allows you to
 2. Connect to the docker instance
 `docker exec -it remocc_webdev_1 /bin/bash`
 3. Start the sshd daemon 
-`./docker-entrypoint-initdb.d/init.sh`
+`/docker-entrypoint-initdb.d/init.sh`
 3. Compile and run \
 ` CGO_ENABLED=0 go build ./` \
 `./remocc`
