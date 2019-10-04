@@ -21,6 +21,8 @@ a mechanism to access a shell to the remote device and in addition allows you to
 <img src="https://github.com/rraks/remocc/blob/master/docs/reverse.png" >
 </p>
 
+## Building necessary images
+1. docker-compose build
 
 ## Running it
 ### Production 
