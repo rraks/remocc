@@ -11,13 +11,24 @@ type Device struct {
     DevName, MacId, DevDescr, SSHKey string
 }
 
+//Nullable Device struct
 type DeviceLog struct {
-    LastSeen time.Time
-    TunnelStatus  sql.NullString
-    UplinkMsg sql.NullString
-    DownlinkMsg sql.NullString
-    PingTime sql.NullInt64
-    Port sql.NullString
+    LastSeen time.Time `json:"lastSeen"`
+    TunnelStatus  sql.NullString `json:"tunnelStatus"`
+    UplinkMsg sql.NullString `json:"uplinkMsg"`
+    DownlinkMsg sql.NullString `json:"downlinkMsg"`
+    PingTime sql.NullInt64 `json:"pingTime"`
+    Port sql.NullString `json:"port"`
+}
+
+//Non-Nullable Device struct
+type DeviceLogNon struct {
+    LastSeen time.Time `json:"lastSeen"`
+    TunnelStatus  string `json:"tunnelStatus"`
+    UplinkMsg string `json:"uplinkMsg"`
+    DownlinkMsg string `json:"downlinkMsg"`
+    PingTime int `json:"pingTime"`
+    Port string `json:"port"`
 }
 
 

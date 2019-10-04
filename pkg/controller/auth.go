@@ -28,9 +28,9 @@ var jwtPassword string
 
 // Claims structure for devices claiming a JWT
 type DevClaims struct {
-    DevName string `json: "devName"`
-    Email string `json: "email"`
-    Pwd string `json: "pwd"`
+    DevName string `json:"devName"`
+    Email string `json:"email"`
+    Pwd string `json:"pwd"`
 }
 
 // JWT response message structure

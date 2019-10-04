@@ -253,7 +253,9 @@
                         },
                         success : function(res) {
                             resp = JSON.parse(res);
-                            $('#tableTunStat').html(resp["tunnelStatus"]);
+                            if(resp["tunnelStatus"] == "launch") {
+                                $('#tableTunStat').html("<button type=\"button\" class=\"btn btn-success\" onClick=\"\"> Launch </button>");
+                            }
                             $('#tablePort').html(resp["port"]);
                         },
                         error: function() {
@@ -262,6 +264,31 @@
                     });
                 }
             </script>
+
+            <!-- TODO: Launch Terminal here -->
+            <script type="text/javascript">
+                function launchTerminal(devName){
+                    $.ajax({
+                        type: 'get',
+                        url: '/user/devices/info/ssh/',
+                        datatype:  'json',
+                        data: {
+                            devName:devName
+                        },
+                        success : function(res) {
+                            resp = JSON.parse(res);
+                            if(resp["tunnelStatus"] == "launch") {
+                                $('#tableTunStat').html("<button type=\"button\" class=\"btn btn-success\" onClick=\"\"> Launch </button>");
+                            }
+                            $('#tablePort').html(resp["port"]);
+                        },
+                        error: function() {
+                            alert("Error");
+                        }
+                    });
+                }
+            </script>
+
                 </div>
                 </main>
             </div>

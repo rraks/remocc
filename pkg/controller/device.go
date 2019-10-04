@@ -130,7 +130,7 @@ func FrontPageHandler(w http.ResponseWriter, r *http.Request, email string, tabl
 
 
 // Device preview page showing tunnel status and latest logs (up to 10)
-func GetDeviceInfo(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+func DeviceInfoHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
     email_tbl := getEmailTableName(email)
     var deviceLogs []*models.DeviceLog
     if r.Method == "GET" {
@@ -151,20 +151,35 @@ func GetDeviceInfo(w http.ResponseWriter, r *http.Request, email string, devTabl
     }
 }
 
+// Device Logs
+func DeviceLogsHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+    log.Println("Hit Device Logs Handler")
+    email_tbl := getEmailTableName(email)
+    var deviceLogs []*models.DeviceLog
+    if r.Method == "GET" {
+        devName := r.URL.Query()["devName"][0]
+        device, err := devEnv.db.ADevice(devTable, devName)
+        checkErr(err, "No such device exists")
+        deviceLogs, err = devEnv.db.GetDeviceLogs(email_tbl+"_"+device.DevName, 0, 10)
+        log.Println("Got Data")
+        log.Println(deviceLogs)
+        checkErr(err, "Couldn't retreive device logs")
+        json.NewEncoder(w).Encode(deviceLogs)
+    }
+}
+
+
 // Get SSHStatus, i.e, if user has scheduled a tunnel to be made, if device has launched that tunnel, 
 // or if it is stopped
-func GetDeviceSSHStatus(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+func DeviceSSHStatusHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
     email_tbl := getEmailTableName(email)
     if r.Method == "GET" {
         devName := r.URL.Query()["devName"][0]
         device, err := devEnv.db.ADevice(devTable, devName)
         checkErr(err, "Couldn't retreuve device")
-        deviceStopLog, err := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "stop")
-        checkErr(err, "No stop logs")
-        deviceLaunchLog, err := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "launch")
-        checkErr(err, "No launch logs")
+        deviceStopLog, _ := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "stop")
+        deviceLaunchLog, _ := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "launch")
         deviceScheduleLog, _ := devEnv.db.GetLatestSSHStatus(email_tbl+"_"+device.DevName, "schedule")
-        checkErr(err, "No schedule logs")
         _ = deviceStopLog // TODO: Do somethings with deviceStopLog
 		if (deviceScheduleLog != nil) && (deviceLaunchLog == nil ) {
 				val := &SSHReq{Port:"", TunnelStatus:"scheduled"}
@@ -194,7 +209,7 @@ func GetDeviceSSHStatus(w http.ResponseWriter, r *http.Request, email string, de
 
 
 // Function users use to send a downlink message to the device
-func SendDeviceDownlink(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+func DeviceDownlinkHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
     usr, err := usrEnv.db.AUser(email)
     email_tbl := strings.Replace(usr.Email,"@","_",-1)
     email_tbl = strings.Replace(email_tbl,".","_",-1)
@@ -216,7 +231,7 @@ func SendDeviceDownlink(w http.ResponseWriter, r *http.Request, email string, de
 }
 
 // Functions users use to make an SSH request to schedule or stop
-func SendSSHRequest(w http.ResponseWriter, r *http.Request, email string, devTable string) {
+func SSHRequestHandler(w http.ResponseWriter, r *http.Request, email string, devTable string) {
     email_tbl := getEmailTableName(email)
     if r.Method == "POST" {
         if err := r.ParseForm(); err != nil {
@@ -252,7 +267,7 @@ func SendSSHRequest(w http.ResponseWriter, r *http.Request, email string, devTab
     }
 }
 
-func SendHeartBeat(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
+func HeartBeatHandler(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
     var heartBeatReq HeartBeatReq
     json.NewDecoder(r.Body).Decode(&heartBeatReq)
     email_tbl := getEmailTableName(devClaims.Email)
@@ -273,7 +288,7 @@ func SendHeartBeat(w http.ResponseWriter, r *http.Request, devClaims *DevClaims)
     }
 }
 
-func SendUplink(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
+func DeviceUplinkHandler(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
     var  uplinkReq UplinkReq
     json.NewDecoder(r.Body).Decode(&uplinkReq)
     email_tbl := getEmailTableName(devClaims.Email)
@@ -296,7 +311,7 @@ func SendUplink(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
 
 }
 
-func MakeTunnelRequest(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
+func DeviceTunnelRequestHandler(w http.ResponseWriter, r *http.Request, devClaims *DevClaims) {
     var  sshReq SSHReq
     json.NewDecoder(r.Body).Decode(&sshReq)
     email_tbl := getEmailTableName(devClaims.Email)

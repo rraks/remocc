@@ -10,7 +10,9 @@ networks:
 services:
 
   web:
-    build: .
+    build: 
+      dockerfile: ./Dockerfile
+      context: .
     depends_on:
       - "db"
     ports:
@@ -30,7 +32,6 @@ services:
     command: bash -c "/docker-entrypoint-initdb.d/init.sh && /go/src/github.com/rraks/remocc/remocc"
 
   webdev:
-    build: ./Dockerfile.devel
     depends_on:
       - "db"
     ports:
@@ -71,7 +72,6 @@ services:
 
 
   device:
-    build: ./Dockerfile.device
     restart: on-failure
     networks: 
       - remocc-net

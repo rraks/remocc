@@ -103,7 +103,7 @@ func runloop() {
                 port := fmt.Sprintf("%v", resp["port"])
                 log.Println("Port is ", port)
                 if SendSSHReq(port, jwt){
-                    go exe_cmd("nohup", "ssh", "-p2222", "-N", "-R", port+":localhost:"+"22", linux_usr+"@webdev", "> /dev/null 2>&1", "&")
+                    go exe_cmd("nohup", "ssh", "-o StrictHostKeyChecking=no", "-o UserKnownHostsFile=/dev/null", "-p2222", "-N", "-R", port+":localhost:"+"22", linux_usr+"@webdev", "> /dev/null 2>&1", "&")
                     log.Println("Starting SSH Session")
                 }
                 log.Println("[END]")

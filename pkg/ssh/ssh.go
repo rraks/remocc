@@ -87,7 +87,6 @@ func AddUserKey(email_tbl string, sshKey string) {
 
 func DelDeviceKey(email_tbl string, sshKey string) (error) {
     sshdMutx.Lock()
-    log.Println("Hurrah !!!, Deleteing device key ")
     authKeysFile := "/home/"+email_tbl+"/.ssh/authorized_keys"
     input, err := ioutil.ReadFile(authKeysFile)
     if err != nil {
@@ -136,3 +135,7 @@ func AddUser(email string, password string, sshKey string) {
     exe_cmd("touch", "/home/"+email_tbl+"/.ssh/authorized_keys")
     AddUserKey(email_tbl, sshKey)
 }
+
+func StatConnection() {
+}
+
