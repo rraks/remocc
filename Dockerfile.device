@@ -6,11 +6,14 @@ WORKDIR /go/src/github.com/rraks/remocc/
 ENV GO111MODULE=on
 RUN apk --update add --no-cache openssh bash \
   && sed -i s/#PermitRootLogin.*/PermitRootLogin\ yes/ /etc/ssh/sshd_config \
-  && echo "root:root" | chpasswd \
-  && rm -rf /var/cache/apk/* \
   && /usr/bin/ssh-keygen -A \
   && ssh-keygen -t rsa -b 4096 -f  /etc/ssh/ssh_host_key \
-  && mkdir /root/.ssh && touch /root/.ssh/authorized_keys
-COPY ./test/sshtests/id_rsa.pub /root/.ssh/id_rsa.pub
-COPY ./test/sshtests/id_rsa /root/.ssh/id_rsa
+  && rm -rf /var/cache/apk/* \
+  && mkdir /root/.ssh && touch /root/.ssh/authorized_keys \
+  && adduser -D testDevice \
+  && echo "testDevice:testDevice" | chpasswd
+COPY ./test/sshtests/id_rsa.pub /home/testDevice/.ssh/id_rsa.pub
+COPY ./test/sshtests/id_rsa /home/testDevice/.ssh/id_rsa
+RUN chown testDevice /home/testDevice/.ssh/id_rsa \
+  && chmod 600 /home/testDevice/.ssh/id_rsa
 

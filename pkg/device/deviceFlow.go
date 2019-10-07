@@ -13,13 +13,18 @@ import (
     "os/exec"
 )
 
-var loginUrl = "http://webdev:3000/devices/login/"
-var uplinkUrl = "http://webdev:3000/devices/data/uplink/"
-var sshUrl = "http://webdev:3000/devices/data/ssh/"
+var hostUrl = "139.59.88.117"
+var hostPort = "4000"
+
+var loginUrl = "http://" + hostUrl + ":" + hostPort + "/devices/login/"
+var uplinkUrl = "http://" + hostUrl + ":" + hostPort + "/devices/data/uplink/"
+var sshUrl = "http://" + hostUrl + ":" + hostPort + "/devices/data/ssh/"
 
 var devName = "testDevice"
-var email = "a@a.com"
+var email = "rakshitadmar@gmail.com"
 var devPassword = "testDevice"
+
+var keyFile = "/home/testDevice/.ssh/id_rsa"
 
 type Jwtresp struct {
     Token string `json:"token"`
@@ -44,11 +49,13 @@ func exe_cmd(cmd string, args ...string) ([]byte) {
 
 func GetJWT(devName string, email string, pwd string) (string){
     var jwtresp Jwtresp
+    log.Println("Sending JWT Request")
     payload := strings.NewReader("{\"devName\":\""+devName+"\", \"email\":\""+email+"\", \"pwd\":\""+pwd+"\"}")
     req, _ := http.NewRequest("GET", loginUrl, payload)
     req.Header.Add("Content-Type", "application/json")
     req.Header.Add("cache-control", "no-cache")
     res, _ := http.DefaultClient.Do(req)
+    log.Println("Got response")
     log.Println(res)
     json.NewDecoder(res.Body).Decode(&jwtresp)
     return jwtresp.Token
@@ -103,7 +110,7 @@ func runloop() {
                 port := fmt.Sprintf("%v", resp["port"])
                 log.Println("Port is ", port)
                 if SendSSHReq(port, jwt){
-                    go exe_cmd("nohup", "ssh", "-o StrictHostKeyChecking=no", "-o UserKnownHostsFile=/dev/null", "-p2222", "-N", "-R", port+":localhost:"+"22", linux_usr+"@webdev", "> /dev/null 2>&1", "&")
+                    go exe_cmd("nohup", "ssh", "-i " + keyFile, "-o StrictHostKeyChecking=no", "-o UserKnownHostsFile=/dev/null", "-p2222", "-N", "-R", port+":localhost:"+"22", linux_usr+ "@" + hostUrl, "&")
                     log.Println("Starting SSH Session")
                 }
                 log.Println("[END]")
