@@ -14,10 +14,13 @@ import (
     "strings"
     "github.com/rraks/remocc/pkg/ssh"
     "github.com/rraks/remocc/pkg/scheduler"
+    "os"
 )
 
 // Downlink cache for all devices
 var devDownlinkCache *cache.Cache
+var remoccPort string 
+var remoccHost string 
 
 // Database environment for "device" related database accesses
 type DevEnv struct {
@@ -46,6 +49,10 @@ type DownlinkReq struct {
 type SSHReq struct {
     TunnelStatus string `json:"tunnelStatus"` // schedule, launch, stop 
     Port string `json:"port"`
+    RemoccPort string `json:"remoccPort"`
+    Uname string `json:"uname"`
+    DevName string `json:"devName"`
+    RemoccHost string `json:"remoccHost"`
 }
 
 // Structure devices use to send a message to server
@@ -67,6 +74,8 @@ func init() {
     }
     devEnv = &DevEnv{db}
     //Create simple downlink cache
+    remoccPort = os.Getenv("REMOCC_SSH")
+    remoccHost = os.Getenv("REMOCC_HOST")
     devDownlinkCache = cache.New(2*time.Hour,4*time.Hour)
 }
 
@@ -188,7 +197,7 @@ func DeviceSSHStatusHandler(w http.ResponseWriter, r *http.Request, email string
         }
 		if (deviceScheduleLog != nil) && (deviceLaunchLog != nil ) {
 			if(deviceLaunchLog.LastSeen.After(deviceScheduleLog.LastSeen)) {
-				val := &SSHReq{Port:deviceLaunchLog.Port.String, TunnelStatus:"launch"}
+                val := &SSHReq{RemoccHost:remoccHost, RemoccPort:remoccPort, Uname:email_tbl, DevName:device.DevName, Port:deviceLaunchLog.Port.String, TunnelStatus:"launch"}
 				json.NewEncoder(w).Encode(val)
 				return
 			} else {

@@ -13,8 +13,8 @@ import (
     "os/exec"
 )
 
-var hostUrl = "139.59.88.117"
-var hostPort = "4000"
+var hostUrl = "web"
+var hostPort = "3000"
 
 var loginUrl = "http://" + hostUrl + ":" + hostPort + "/devices/login/"
 var uplinkUrl = "http://" + hostUrl + ":" + hostPort + "/devices/data/uplink/"

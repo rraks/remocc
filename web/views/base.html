@@ -253,10 +253,13 @@
                         },
                         success : function(res) {
                             resp = JSON.parse(res);
+                            console.log(resp)
                             if(resp["tunnelStatus"] == "launch") {
                                 $('#tableTunStat').html("<button type=\"button\" class=\"btn btn-success\" onClick=\"\"> Launch </button>");
                             }
-                            $('#tablePort').html(resp["port"]);
+                            $('#tableCmd').html("ssh -t " + resp["uname"] + "@" + resp["remoccHost"] + " -p " + resp["remoccPort"] + " \' ssh " + resp["devName"] + "@localhost -p " + resp["port"] + "\'");
+                            console.log(resp["remoccPort"])
+                            console.log(resp["devName"])
                         },
                         error: function() {
                             alert("Error");
@@ -280,7 +283,7 @@
                             if(resp["tunnelStatus"] == "launch") {
                                 $('#tableTunStat').html("<button type=\"button\" class=\"btn btn-success\" onClick=\"\"> Launch </button>");
                             }
-                            $('#tablePort').html(resp["port"]);
+                            $('#tableCmd').html(resp["port"]);
                         },
                         error: function() {
                             alert("Error");
