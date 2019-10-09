@@ -32,7 +32,7 @@ type UserStore interface {
 type DeviceStore interface {
     AllDevices(tableName string) (devices []*Device, err error)
     ADevice(tableName string, devName string) (device *Device, err error)
-    NewDevice(tableName string, devName string, macId string, devDescr string, sshKey string, devPwdHash string) (serial int, err error)
+    NewDevice(tableName string, devName string, devUName string, macId string, devDescr string, sshKey string, devPwdHash string) (serial int, err error)
     DeleteDevice(tableName string, devName string) (err error)
     CreateDeviceTable(tableName string) (err error)
     DropDeviceTable(tableName string) (err error)

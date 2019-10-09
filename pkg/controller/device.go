@@ -52,6 +52,7 @@ type SSHReq struct {
     RemoccPort string `json:"remoccPort"`
     Uname string `json:"uname"`
     DevName string `json:"devName"`
+    DevUName string `json:"devUName"`
     RemoccHost string `json:"remoccHost"`
 }
 
@@ -104,12 +105,13 @@ func DeviceManagerHandler(w http.ResponseWriter, r *http.Request, email string, 
     }
     if r.Method == "POST" {
         devName := r.Form["devName"][0]
+        devUName := r.Form["devUName"][0]
         macId := r.Form["macId"][0]
         description := r.Form["devDescr"][0]
         sshKey := r.Form["sshKey"][0]
         devPwd := r.Form["devPwd"][0]
         devPwdHash,_ := HashPassword(devPwd)
-        _, err = devEnv.db.NewDevice(tableName, devName, macId, description, sshKey, devPwdHash)
+        _, err = devEnv.db.NewDevice(tableName, devName, devUName, macId, description, sshKey, devPwdHash)
         checkErr(err, "Passwords don't match")
         err = devEnv.db.CreateDeviceTable(email_tbl+"_"+devName) // TODO: Have a better way of creating device log
         checkErr(err, "Couldn't create device table")
@@ -197,7 +199,7 @@ func DeviceSSHStatusHandler(w http.ResponseWriter, r *http.Request, email string
         }
 		if (deviceScheduleLog != nil) && (deviceLaunchLog != nil ) {
 			if(deviceLaunchLog.LastSeen.After(deviceScheduleLog.LastSeen)) {
-                val := &SSHReq{RemoccHost:remoccHost, RemoccPort:remoccPort, Uname:email_tbl, DevName:device.DevName, Port:deviceLaunchLog.Port.String, TunnelStatus:"launch"}
+                val := &SSHReq{RemoccHost:remoccHost, RemoccPort:remoccPort, Uname:email_tbl, DevName:device.DevName, DevUName:device.DevUName, Port:deviceLaunchLog.Port.String, TunnelStatus:"launch"}
 				json.NewEncoder(w).Encode(val)
 				return
 			} else {

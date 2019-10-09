@@ -13,7 +13,7 @@ import (
     "os/exec"
 )
 
-var hostUrl = "web"
+var hostUrl = "webdev"
 var hostPort = "3000"
 
 var loginUrl = "http://" + hostUrl + ":" + hostPort + "/devices/login/"

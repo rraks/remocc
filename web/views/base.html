@@ -141,6 +141,8 @@
                                             <form class="form-signin" id="newDeviceForm" method="POST" action="/user/devices/manage/">
                                                 <label for="devName" class="sr-only">Device Name</label>
                                                 <input type="text" name="devName" id="devName" class="form-control" placeholder="name" required autofocus>
+                                                <label for="devUName" class="sr-only">Device User Name</label>
+                                                <input type="text" name="devUName" id="devUName" class="form-control" placeholder="device username" required autofocus>
                                                 <label for="macId" class="sr-only">mac address</label>
                                                 <input type="text" name="macId" id="macId" class="form-control" placeholder="MAC Address of the device" required>
                                                 <label for="devDescr" class="sr-only">Device Description</label>
@@ -257,7 +259,7 @@
                             if(resp["tunnelStatus"] == "launch") {
                                 $('#tableTunStat').html("<button type=\"button\" class=\"btn btn-success\" onClick=\"\"> Launch </button>");
                             }
-                            $('#tableCmd').html("ssh -t " + resp["uname"] + "@" + resp["remoccHost"] + " -p " + resp["remoccPort"] + " \' ssh " + resp["devName"] + "@localhost -p " + resp["port"] + "\'");
+                            $('#tableCmd').html("ssh -t " + resp["uname"] + "@" + resp["remoccHost"] + " -p " + resp["remoccPort"] + " \' ssh " + resp["devUName"] + "@localhost -p " + resp["port"] + "\'");
                             console.log(resp["remoccPort"])
                             console.log(resp["devName"])
                         },

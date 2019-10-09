@@ -99,7 +99,7 @@ func (db *DB) GetPwd(email string) (string, error) {
 
 
 func (db *DB) CreateDevicesTable(tableName string) (error) {
-    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,devName TEXT, macId macaddr, devDescr Text, sshKey Text, devPwdHash Text)"
+    query := "CREATE TABLE "+ tableName + " (id SERIAL PRIMARY KEY,devName TEXT, devUName TEXT, macId macaddr, devDescr Text, sshKey Text, devPwdHash Text)"
     _, err := db.Exec(query)
     if err != nil {
         log.Println(err)
